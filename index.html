@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>VT Templates // Vulnerable Targets</title>
+    <link rel="stylesheet" href="assets/css/style.css">
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>💀</text></svg>">
+</head>
+
+<body>
+    <canvas id="matrix-bg"></canvas>
+
+    <header>
+        <pre class="ascii-art">
+██╗   ██╗████████╗
+██║   ██║╚══██╔══╝
+██║   ██║   ██║
+╚██╗ ██╔╝   ██║
+ ╚████╔╝    ██║
+  ╚═══╝     ╚═╝
+        </pre>
+        <h1><a href="/">VULNERABLE TARGETS</a></h1>
+        <p>// Security Research Templates Catalog //</p>
+        <div class="header-meta">
+            <span>STATUS: ONLINE</span>
+            <span>ACCESS: GRANTED</span>
+            <span>MODE: READ-ONLY</span>
+        </div>
+    </header>
+
+    <main>
+        <div class="terminal-header">search --query</div>
+        <div class="search-container">
+            <input type="text" id="search" placeholder="CVE-2024-XXXX, XSS, RCE, Django, Laravel..." autocomplete="off" spellcheck="false">
+        </div>
+
+        <div class="stats">
+            <span class="stat">TARGETS: <span class="stat-value" id="total-count">0</span></span>
+            <span class="stat">CVEs: <span class="stat-value" id="cve-count">0</span></span>
+            <span class="stat">BENCHMARKS: <span class="stat-value" id="benchmark-count">0</span></span>
+            <span class="stat">LABS: <span class="stat-value" id="lab-count">0</span></span>
+        </div>
+
+        <div class="templates-grid" id="templates-grid">
+            <div class="loading"></div>
+        </div>
+
+        <div class="no-results" id="no-results" style="display: none;">
+            No targets found matching query.
+        </div>
+    </main>
+
+    <footer>
+        <a href="https://github.com/HappyHackingSpace" target="_blank">HappyHackingSpace</a> // 2025
+    </footer>
+
+    <script>
+        // Matrix rain effect
+        const canvas = document.getElementById('matrix-bg');
+        const ctx = canvas.getContext('2d');
+
+        function resizeCanvas() {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+        }
+        resizeCanvas();
+        window.addEventListener('resize', resizeCanvas);
+
+        const chars = 'アイウエオカキクケコサシスセソタチツテトナニヌネノハヒフヘホマミムメモヤユヨラリルレロワヲン0123456789ABCDEF<>{}[]=/\\';
+        const charArray = chars.split('');
+        const fontSize = 14;
+        let columns = canvas.width / fontSize;
+        let drops = [];
+
+        for (let i = 0; i < columns; i++) {
+            drops[i] = Math.random() * -100;
+        }
+
+        function drawMatrix() {
+            ctx.fillStyle = 'rgba(0, 0, 0, 0.05)';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            ctx.fillStyle = '#404040';
+            ctx.font = fontSize + 'px monospace';
+
+            for (let i = 0; i < drops.length; i++) {
+                const char = charArray[Math.floor(Math.random() * charArray.length)];
+                ctx.fillText(char, i * fontSize, drops[i] * fontSize);
+
+                if (drops[i] * fontSize > canvas.height && Math.random() > 0.975) {
+                    drops[i] = 0;
+                }
+                drops[i]++;
+            }
+        }
+
+        setInterval(drawMatrix, 50);
+
+        window.addEventListener('resize', () => {
+            columns = canvas.width / fontSize;
+            drops = [];
+            for (let i = 0; i < columns; i++) {
+                drops[i] = Math.random() * -100;
+            }
+        });
+
+        // Load templates
+        fetch('./assets/templates.json')
+            .then(res => res.json())
+            .then(templates => {
+                window.templates = templates;
+                window.templatesMap = {};
+                templates.forEach(t => window.templatesMap[t.id] = t);
+                renderStats(templates);
+                renderTemplates(templates);
+                setupSearch();
+            })
+            .catch(err => {
+                console.error('Failed to load templates:', err);
+                document.getElementById('templates-grid').innerHTML = '<div class="no-results" style="display:block;">CONNECTION FAILED: Unable to load targets database.</div>';
+            });
+
+        function renderStats(templates) {
+            document.getElementById('total-count').textContent = templates.length;
+            document.getElementById('cve-count').textContent = templates.filter(t => t.category === 'cves').length;
+            document.getElementById('benchmark-count').textContent = templates.filter(t => t.category === 'benchmarks').length;
+            document.getElementById('lab-count').textContent = templates.filter(t => t.category === 'labs').length;
+        }
+
+        function renderTemplates(templates) {
+            const grid = document.getElementById('templates-grid');
+            const noResults = document.getElementById('no-results');
+
+            if (templates.length === 0) {
+                grid.innerHTML = '';
+                noResults.style.display = 'block';
+                return;
+            }
+
+            noResults.style.display = 'none';
+            grid.innerHTML = templates.map(t => {
+                return `
+    <a href="detail.html?id=${t.id}" class="template-card">
+      <div class="template-header">
+        <span class="template-id">${t.id}</span>
+        <div class="header-badges">
+          ${t.info?.difficulty ? `<span class="difficulty difficulty-${t.info.difficulty.toLowerCase()}">${t.info.difficulty}</span>` : ''}
+          <span class="category ${t.category}">${t.category}</span>
+        </div>
+      </div>
+      <h3 class="template-name">${t.info?.name || t.id}</h3>
+      <p class="template-description">${(t.info?.description || '').replace(/\n/g, ' ').substring(0, 120)}${(t.info?.description?.length > 120) ? '...' : ''}</p>
+      <div class="tags">
+        ${(t.info?.tags || []).slice(0, 4).map(tag =>
+                    `<span class="tag ${['cve', 'xss', 'sqli', 'rce', 'ssrf', 'lfi', 'rfi'].includes(tag.toLowerCase()) ? tag.toLowerCase() : ''}">${tag}</span>`
+                ).join('')}
+        ${t.info?.cve ? `<span class="tag cve">${t.info.cve}</span>` : ''}
+      </div>
+    </a>
+  `}).join('');
+        }
+
+        function setupSearch() {
+            const searchInput = document.getElementById('search');
+            let debounceTimer;
+
+            searchInput.addEventListener('input', (e) => {
+                clearTimeout(debounceTimer);
+                debounceTimer = setTimeout(() => {
+                    const query = e.target.value.toLowerCase().trim();
+
+                    if (!query) {
+                        renderTemplates(window.templates);
+                        return;
+                    }
+
+                    const filtered = window.templates.filter(t => {
+                        const searchable = [
+                            t.id,
+                            t.info?.name,
+                            t.info?.description,
+                            t.info?.cve,
+                            t.info?.cwe,
+                            t.category,
+                            ...(t.info?.tags || []),
+                            ...(t.info?.targets || [])
+                        ].filter(Boolean).join(' ').toLowerCase();
+
+                        return searchable.includes(query);
+                    });
+
+                    renderTemplates(filtered);
+                }, 150);
+            });
+
+            // Focus search on / key
+            document.addEventListener('keydown', (e) => {
+                if (e.key === '/' && document.activeElement !== searchInput) {
+                    e.preventDefault();
+                    searchInput.focus();
+                }
+            });
+        }
+    </script>
+</body>
+
+</html>
