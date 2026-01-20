@@ -28,10 +28,10 @@
         </div>
 
         <div class="stats">
-            <span class="stat">TARGETS: <span class="stat-value" id="total-count">0</span></span>
-            <span class="stat">CVEs: <span class="stat-value" id="cve-count">0</span></span>
-            <span class="stat">BENCHMARKS: <span class="stat-value" id="benchmark-count">0</span></span>
-            <span class="stat">LABS: <span class="stat-value" id="lab-count">0</span></span>
+            <span class="stat" onclick="filterByCategory('')" style="cursor:pointer">TARGETS: <span class="stat-value" id="total-count">0</span></span>
+            <span class="stat" onclick="filterByCategory('cves')" style="cursor:pointer">CVEs: <span class="stat-value" id="cve-count">0</span></span>
+            <span class="stat" onclick="filterByCategory('benchmarks')" style="cursor:pointer">BENCHMARKS: <span class="stat-value" id="benchmark-count">0</span></span>
+            <span class="stat" onclick="filterByCategory('labs')" style="cursor:pointer">LABS: <span class="stat-value" id="lab-count">0</span></span>
         </div>
 
         <div class="templates-grid" id="templates-grid">
@@ -227,6 +227,18 @@
             const searchInput = document.getElementById('search');
             searchInput.value = tag;
             searchInput.dispatchEvent(new Event('input'));
+        }
+
+        function filterByCategory(category) {
+            const searchInput = document.getElementById('search');
+            if (!category) {
+                searchInput.value = '';
+                renderTemplates(window.templates);
+            } else {
+                searchInput.value = category;
+                const filtered = window.templates.filter(t => t.category === category);
+                renderTemplates(filtered);
+            }
         }
     </script>
 </body>

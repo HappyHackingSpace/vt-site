@@ -303,6 +303,12 @@ main {
   padding: 0.4rem 0.8rem;
   font-family: inherit;
   position: relative;
+  cursor: pointer;
+  transition: border-color 0.15s ease;
+}
+
+.stat:hover {
+  border-color: var(--accent);
 }
 
 .stat::before {
