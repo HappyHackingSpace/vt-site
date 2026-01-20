@@ -338,42 +338,9 @@ main {
   overflow: hidden;
 }
 
-.template-card::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: -100%;
-  width: 100%;
-  height: 1px;
-  background: linear-gradient(90deg, transparent, var(--accent), transparent);
-  transition: left 0.4s ease;
-}
-
-.template-card::after {
-  content: '→';
-  position: absolute;
-  right: 1rem;
-  top: 1rem;
-  color: var(--text-dim);
-  opacity: 0;
-  transform: translateX(-10px);
-  transition: all 0.2s ease;
-}
 
 .template-card:hover {
-  border-color: var(--accent);
   text-decoration: none;
-  background: var(--surface-hover);
-}
-
-.template-card:hover::before {
-  left: 100%;
-}
-
-.template-card:hover::after {
-  opacity: 1;
-  transform: translateX(0);
-  color: var(--accent);
 }
 
 .template-header {
@@ -599,10 +566,6 @@ footer a:hover {
   font-size: 0.8rem;
   opacity: 0;
   transition: opacity 0.2s ease;
-}
-
-.template-card:hover .skull-icon {
-  opacity: 0.3;
 }
 
 /* Modal */
