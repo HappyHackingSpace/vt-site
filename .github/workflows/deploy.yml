@@ -23,7 +23,7 @@ jobs:
       - name: Fetch templates.json
         run: |
           mkdir -p assets
-          curl -sL https://raw.githubusercontent.com/HappyHackingSpace/vt-templates/main/assets/templates.json -o assets/templates.json
+          curl -sL https://raw.githubusercontent.com/HappyHackingSpace/vt-templates/main/.assets/templates.json -o assets/templates.json
 
       - name: Setup Pages
         uses: actions/configure-pages@v4
