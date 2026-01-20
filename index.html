@@ -171,9 +171,9 @@
       <p class="template-description">${(t.info?.description || '').replace(/\n/g, ' ').substring(0, 120)}${(t.info?.description?.length > 120) ? '...' : ''}</p>
       <div class="tags">
         ${(t.info?.tags || []).slice(0, 4).map(tag =>
-                    `<span class="tag ${['cve', 'xss', 'sqli', 'rce', 'ssrf', 'lfi', 'rfi'].includes(tag.toLowerCase()) ? tag.toLowerCase() : ''}">${tag}</span>`
+                    `<span class="tag ${['cve', 'xss', 'sqli', 'rce', 'ssrf', 'lfi', 'rfi'].includes(tag.toLowerCase()) ? tag.toLowerCase() : ''}" onclick="searchByTag(event, '${tag}')">${tag}</span>`
                 ).join('')}
-        ${t.info?.cve ? `<span class="tag cve">${t.info.cve}</span>` : ''}
+        ${t.info?.cve ? `<span class="tag cve" onclick="searchByTag(event, '${t.info.cve}')">${t.info.cve}</span>` : ''}
       </div>
     </a>
   `}).join('');
@@ -219,6 +219,14 @@
                     searchInput.focus();
                 }
             });
+        }
+
+        function searchByTag(event, tag) {
+            event.preventDefault();
+            event.stopPropagation();
+            const searchInput = document.getElementById('search');
+            searchInput.value = tag;
+            searchInput.dispatchEvent(new Event('input'));
         }
     </script>
 </body>

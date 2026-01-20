@@ -362,8 +362,6 @@ main {
 
 .template-card:hover {
   border-color: var(--accent);
-  box-shadow: 0 0 30px rgba(0, 255, 65, 0.15), inset 0 0 30px rgba(0, 255, 65, 0.02);
-  transform: translateY(-2px);
   text-decoration: none;
   background: var(--surface-hover);
 }
@@ -459,6 +457,13 @@ main {
   color: var(--text-dim);
   text-transform: lowercase;
   letter-spacing: 0.05em;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.tag:hover {
+  border-color: var(--accent);
+  color: var(--accent);
 }
 
 .tag.cve {
@@ -567,19 +572,6 @@ footer a:hover {
     flex-direction: column;
     gap: 0.5rem;
   }
-}
-
-/* Glitch effect on hover */
-@keyframes glitch {
-  0%, 100% { transform: translate(0); }
-  20% { transform: translate(-1px, 1px); }
-  40% { transform: translate(-1px, -1px); }
-  60% { transform: translate(1px, 1px); }
-  80% { transform: translate(1px, -1px); }
-}
-
-.template-card:hover .template-name {
-  animation: glitch 0.2s ease;
 }
 
 /* Loading animation */
