@@ -376,7 +376,7 @@
                 </div>
             `;
         } else {
-            fetch('./assets/templates.json')
+            fetch('./.assets/templates.json')
                 .then(res => res.json())
                 .then(templates => {
                     const template = templates.find(t => t.id === templateId);
