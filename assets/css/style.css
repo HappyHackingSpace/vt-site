@@ -136,9 +136,27 @@ header::after {
   letter-spacing: 0.1em;
 }
 
-@keyframes textGlow {
-  from { text-shadow: 0 0 10px var(--text-bright), 0 0 20px rgba(255,255,255,0.2); }
-  to { text-shadow: 0 0 20px var(--text-bright), 0 0 40px rgba(255,255,255,0.4), 0 0 60px rgba(255,255,255,0.2); }
+@keyframes titleGlitch {
+  0%, 95%, 100% {
+    transform: translate(0);
+    text-shadow: 0 0 20px rgba(255,255,255,0.5);
+  }
+  96% {
+    transform: translate(-3px, 1px) skewX(2deg);
+    text-shadow: -3px 0 #ff0055, 3px 0 #00ffff;
+  }
+  97% {
+    transform: translate(3px, -1px) skewX(-2deg);
+    text-shadow: 3px 0 #ff0055, -3px 0 #00ffff;
+  }
+  98% {
+    transform: translate(-2px, -1px);
+    text-shadow: -2px 0 #ff0055, 2px 0 #00ffff;
+  }
+  99% {
+    transform: translate(2px, 1px) skewX(1deg);
+    text-shadow: 2px 0 #ff0055, -2px 0 #00ffff;
+  }
 }
 
 header h1 {
@@ -148,6 +166,16 @@ header h1 {
   text-shadow: 0 0 20px rgba(255,255,255,0.5);
   margin-top: 0.5rem;
   font-weight: 400;
+  animation: titleGlitch 2s infinite;
+}
+
+.glitch-char {
+  display: inline-block;
+}
+
+.glitch-char.glitch-active {
+  color: #8b0000;
+  text-shadow: 0 0 8px #8b0000, 0 0 15px #ff0000;
 }
 
 header h1 a {

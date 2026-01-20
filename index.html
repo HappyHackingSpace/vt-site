@@ -6,34 +6,25 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>VT Templates // Vulnerable Targets</title>
     <link rel="stylesheet" href="assets/css/style.css">
-    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>💀</text></svg>">
+    <link rel="icon"
+        href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>💀</text></svg>">
 </head>
 
 <body>
     <canvas id="matrix-bg"></canvas>
 
     <header>
-        <pre class="ascii-art">
-██╗   ██╗████████╗
-██║   ██║╚══██╔══╝
-██║   ██║   ██║
-╚██╗ ██╔╝   ██║
- ╚████╔╝    ██║
-  ╚═══╝     ╚═╝
-        </pre>
-        <h1><a href="/">VULNERABLE TARGETS</a></h1>
+
+        <h1><a href="/" id="glitch-title">VULNERABLE TARGETS</a></h1>
         <p>// Security Research Templates Catalog //</p>
-        <div class="header-meta">
-            <span>STATUS: ONLINE</span>
-            <span>ACCESS: GRANTED</span>
-            <span>MODE: READ-ONLY</span>
-        </div>
+
     </header>
 
     <main>
         <div class="terminal-header">search --query</div>
         <div class="search-container">
-            <input type="text" id="search" placeholder="CVE-2024-XXXX, XSS, RCE, Django, Laravel..." autocomplete="off" spellcheck="false">
+            <input type="text" id="search" placeholder="CVE-2024-XXXX, XSS, RCE, Django, Laravel..." autocomplete="off"
+                spellcheck="false">
         </div>
 
         <div class="stats">
@@ -57,6 +48,33 @@
     </footer>
 
     <script>
+        // Glitch title effect
+        (function () {
+            const title = document.getElementById('glitch-title');
+            const text = title.textContent;
+            title.innerHTML = text.split('').map(char =>
+                char === ' ' ? ' ' : `<span class="glitch-char">${char}</span>`
+            ).join('');
+
+            function glitchWave() {
+                const chars = title.querySelectorAll('.glitch-char');
+                let i = 0;
+                const interval = setInterval(() => {
+                    if (i > 0) chars[i - 1].classList.remove('glitch-active');
+                    if (i < chars.length) {
+                        chars[i].classList.add('glitch-active');
+                        i++;
+                    } else {
+                        chars[chars.length - 1].classList.remove('glitch-active');
+                        clearInterval(interval);
+                    }
+                }, 40);
+            }
+
+            glitchWave();
+            setInterval(glitchWave, 3000);
+        })();
+
         // Matrix rain effect
         const canvas = document.getElementById('matrix-bg');
         const ctx = canvas.getContext('2d');
