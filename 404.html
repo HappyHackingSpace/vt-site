@@ -115,9 +115,18 @@
             font-size: 0.9rem;
             line-height: 1.8;
             color: var(--text);
+            white-space: normal;
+        }
+
+        .technical-text {
             white-space: pre-wrap;
             word-wrap: break-word;
             overflow-wrap: break-word;
+            font-family: monospace;
+            font-size: 0.85rem;
+            background: rgba(0, 0, 0, 0.2);
+            padding: 1rem;
+            border: 1px solid var(--border);
         }
 
         .tags {
@@ -452,7 +461,7 @@
                     ${t.technical ? `
                     <div class="detail-section">
                         <span class="section-label">// Technical Details</span>
-                        <p class="section-text">${t.technical}</p>
+                        <p class="section-text technical-text">${t.technical}</p>
                     </div>
                     ` : ''}
 
