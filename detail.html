@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>VT Detail</title>
+    <title>Vulnerable Target // Security Research Templates</title>
     <link rel="stylesheet" href="assets/css/style.css">
     <link rel="icon"
         href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>💀</text></svg>">
@@ -160,6 +160,21 @@
         .poc-file.semgrep {
             border-color: var(--warning);
             color: var(--warning);
+        }
+
+        .poc-file.bambda {
+            border-color: #a855f7;
+            color: #a855f7;
+        }
+
+        a.poc-file {
+            text-decoration: none;
+            transition: all 0.2s ease;
+        }
+
+        a.poc-file:hover {
+            background: rgba(255, 255, 255, 0.05);
+            transform: translateY(-1px);
         }
 
         .code-block {
@@ -327,7 +342,7 @@
     </div>
 
     <footer>
-        <a href="https://github.com/HappyHackingSpace" target="_blank">HappyHackingSpace</a> // 2025
+        <a href="https://github.com/HappyHackingSpace" target="_blank">HappyHackingSpace</a> // 2026
     </footer>
 
     <script>
@@ -462,20 +477,25 @@
                     </div>
                     ` : ''}
 
-                    ${poc.nuclei?.length || poc.semgrep?.length ? `
+                    ${poc.nuclei?.length || poc.semgrep?.length || poc.bambda?.length ? `
                     <div class="detail-section">
                         <span class="section-label">// PoC Files</span>
                         <div class="poc-files">
-                            ${poc.nuclei?.map(f => `<span class="poc-file nuclei">nuclei: ${f}</span>`).join('') || ''}
-                            ${poc.semgrep?.map(f => `<span class="poc-file semgrep">semgrep: ${f}</span>`).join('') || ''}
+                            ${poc.nuclei?.map(f => `<a href="https://github.com/omarkurt/vt-templates/blob/main/cves/${t.id}/${f}" target="_blank" rel="noopener" class="poc-file nuclei">nuclei: ${f}</a>`).join('') || ''}
+                            ${poc.bambda?.map(f => `<a href="https://github.com/omarkurt/vt-templates/blob/main/cves/${t.id}/${f}" target="_blank" rel="noopener" class="poc-file bambda">bambda: ${f}</a>`).join('') || ''}
+                            ${poc.semgrep?.map(f => `<a href="https://github.com/omarkurt/vt-templates/blob/main/cves/${t.id}/${f}" target="_blank" rel="noopener" class="poc-file semgrep">semgrep: ${f}</a>`).join('') || ''}
                         </div>
                     </div>
                     ` : ''}
 
                     ${providers['docker-compose'] ? `
-                    <div class="detail-section">
-                        <span class="section-label">// Docker Compose</span>
-                        <code class="code-block">${providers['docker-compose'].path}</code>
+                    <div class="detail-section post-install-section">
+                        <span class="section-label">// VT CLI</span>
+                        <ul class="post-install-list">
+                            <li>./vt start --id ${t.id} --provider docker-compose</li>
+                            <li>./vt info --id ${t.id}</li>
+                            <li>./vt stop --id ${t.id}</li>
+                        </ul>
                     </div>
                     ` : ''}
 
