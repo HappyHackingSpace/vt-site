@@ -527,10 +527,10 @@
                     </div>
                     ` : ''}
 
-                    ${info.references?.length ? `
+                    ${t.references?.length || info.references?.length ? `
                     <div class="detail-section">
                         <span class="section-label">// References</span>
-                        <ul class="ref-list">${info.references.map(ref =>
+                        <ul class="ref-list">${(t.references || info.references).map(ref =>
                 `<li><a href="${ref}" target="_blank" rel="noopener">${ref}</a></li>`
             ).join('')}</ul>
                     </div>
