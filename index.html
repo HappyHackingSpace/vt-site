@@ -28,10 +28,14 @@
         </div>
 
         <div class="stats">
-            <span class="stat" onclick="filterByCategory('')" style="cursor:pointer">TARGETS: <span class="stat-value" id="total-count">0</span></span>
-            <span class="stat" onclick="filterByCategory('cves')" style="cursor:pointer">CVEs: <span class="stat-value" id="cve-count">0</span></span>
-            <span class="stat" onclick="filterByCategory('benchmarks')" style="cursor:pointer">BENCHMARKS: <span class="stat-value" id="benchmark-count">0</span></span>
-            <span class="stat" onclick="filterByCategory('labs')" style="cursor:pointer">LABS: <span class="stat-value" id="lab-count">0</span></span>
+            <span class="stat" onclick="filterByCategory('')" style="cursor:pointer">TARGETS: <span class="stat-value"
+                    id="total-count">0</span></span>
+            <span class="stat" onclick="filterByCategory('cves')" style="cursor:pointer">CVEs: <span class="stat-value"
+                    id="cve-count">0</span></span>
+            <span class="stat" onclick="filterByCategory('benchmarks')" style="cursor:pointer">BENCHMARKS: <span
+                    class="stat-value" id="benchmark-count">0</span></span>
+            <span class="stat" onclick="filterByCategory('labs')" style="cursor:pointer">LABS: <span class="stat-value"
+                    id="lab-count">0</span></span>
         </div>
 
         <div class="templates-grid" id="templates-grid">
@@ -44,7 +48,7 @@
     </main>
 
     <footer>
-        <a href="https://github.com/HappyHackingSpace" target="_blank">HappyHackingSpace</a> // 2025
+        <a href="https://github.com/HappyHackingSpace" target="_blank">HappyHackingSpace</a> // 2026
     </footer>
 
     <script>
@@ -159,7 +163,7 @@
             noResults.style.display = 'none';
             grid.innerHTML = templates.map(t => {
                 return `
-    <a href="detail.html?id=${t.id}" class="template-card">
+    <a href="/${t.id.toUpperCase()}" class="template-card">
       <div class="template-header">
         <span class="template-id">${t.id}</span>
         <div class="header-badges">

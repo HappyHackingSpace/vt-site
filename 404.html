@@ -1,0 +1,566 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Vulnerable Target // Security Research Templates</title>
+    <link rel="stylesheet" href="/assets/css/style.css">
+    <link rel="icon"
+        href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>💀</text></svg>">
+    <style>
+        .detail-container {
+            max-width: 900px;
+            margin: 2rem auto;
+            padding: 0 1rem;
+            position: relative;
+            z-index: 1;
+        }
+
+        .back-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 0.75rem;
+            color: var(--text-dim);
+            margin-bottom: 2rem;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+        }
+
+        .back-link:hover {
+            color: var(--text-bright);
+        }
+
+        .detail-card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            padding: 2rem;
+        }
+
+        .detail-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 1rem;
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+
+        .detail-id {
+            font-size: 0.75rem;
+            color: var(--text-dim);
+            letter-spacing: 0.05em;
+        }
+
+        .detail-id::before {
+            content: '0x';
+            color: var(--accent);
+        }
+
+        .detail-title {
+            font-size: 1.5rem;
+            font-weight: 400;
+            color: var(--text-bright);
+            margin-bottom: 1.5rem;
+            line-height: 1.4;
+        }
+
+        .detail-meta {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 1rem;
+            margin-bottom: 2rem;
+            padding: 1.5rem;
+            background: rgba(255, 255, 255, 0.02);
+            border: 1px solid var(--border);
+        }
+
+        .meta-item {
+            display: flex;
+            flex-direction: column;
+            gap: 0.25rem;
+        }
+
+        .meta-item .label {
+            font-size: 0.6rem;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            color: var(--text-dim);
+        }
+
+        .meta-item .value {
+            font-size: 0.9rem;
+            color: var(--text);
+        }
+
+        .meta-item .value.danger {
+            color: var(--danger);
+        }
+
+        .detail-section {
+            margin: 1.5rem 0;
+        }
+
+        .section-label {
+            display: block;
+            font-size: 0.75rem;
+            color: var(--text-dim);
+            margin-bottom: 0.75rem;
+            letter-spacing: 0.05em;
+            text-transform: uppercase;
+        }
+
+        .section-text {
+            font-size: 0.9rem;
+            line-height: 1.8;
+            color: var(--text);
+            white-space: pre-line;
+        }
+
+        .tags {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+        }
+
+        .tag {
+            font-size: 0.7rem;
+            padding: 0.25rem 0.6rem;
+            background: transparent;
+            border: 1px solid var(--text-dim);
+            color: var(--text-dim);
+            text-transform: lowercase;
+        }
+
+        .tag.danger {
+            border-color: var(--danger);
+            color: var(--danger);
+        }
+
+        .poc-files {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+        }
+
+        .poc-file {
+            font-size: 0.75rem;
+            padding: 0.4rem 0.8rem;
+            background: var(--surface-hover);
+            border: 1px solid var(--border);
+            color: var(--text);
+        }
+
+        .poc-file.nuclei {
+            border-color: var(--info);
+            color: var(--info);
+        }
+
+        .poc-file.semgrep {
+            border-color: var(--warning);
+            color: var(--warning);
+        }
+
+        .poc-file.bambda {
+            border-color: #a855f7;
+            color: #a855f7;
+        }
+
+        a.poc-file {
+            text-decoration: none;
+            transition: all 0.2s ease;
+        }
+
+        a.poc-file:hover {
+            background: rgba(255, 255, 255, 0.05);
+            transform: translateY(-1px);
+        }
+
+        .code-block {
+            display: block;
+            font-size: 0.8rem;
+            padding: 1rem;
+            background: var(--surface-hover);
+            border: 1px solid var(--border);
+            color: var(--text);
+            overflow-x: auto;
+        }
+
+        .ref-list {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        .ref-list li {
+            font-size: 0.8rem;
+            margin-bottom: 0.75rem;
+            padding-left: 1.5rem;
+            position: relative;
+        }
+
+        .ref-list li::before {
+            content: '→';
+            position: absolute;
+            left: 0;
+            color: var(--accent);
+        }
+
+        .ref-list a {
+            color: var(--text-dim);
+            word-break: break-all;
+        }
+
+        .ref-list a:hover {
+            color: var(--text-bright);
+        }
+
+        .detail-actions {
+            margin-top: 2rem;
+            padding-top: 1.5rem;
+            border-top: 1px solid var(--border);
+            display: flex;
+            gap: 1rem;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            display: inline-block;
+            padding: 0.75rem 1.5rem;
+            font-family: inherit;
+            font-size: 0.8rem;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            border: 1px solid;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            text-decoration: none;
+            background: transparent;
+        }
+
+        .btn-primary {
+            border-color: var(--text-bright);
+            color: var(--text-bright);
+        }
+
+        .btn-primary:hover {
+            background: var(--text-bright);
+            color: var(--bg);
+        }
+
+        .btn-secondary {
+            border-color: var(--accent);
+            color: var(--accent);
+        }
+
+        .btn-secondary:hover {
+            background: var(--accent);
+            color: var(--bg);
+        }
+
+        .not-found {
+            text-align: center;
+            padding: 4rem 2rem;
+            color: var(--text-dim);
+        }
+
+        .not-found h2 {
+            color: var(--danger);
+            font-size: 1.2rem;
+            margin-bottom: 1rem;
+        }
+
+        .loading-detail {
+            text-align: center;
+            padding: 4rem;
+            color: var(--accent);
+        }
+
+        /* Difficulty colors */
+        .difficulty-easy {
+            color: #22c55e;
+        }
+
+        .difficulty-medium {
+            color: var(--warning);
+        }
+
+        .difficulty-hard {
+            color: var(--danger);
+        }
+
+        /* Post-install section */
+        .post-install-section {
+            background: rgba(255, 255, 255, 0.02);
+            border: 1px solid var(--border);
+            padding: 1.25rem;
+            margin-top: 1.5rem;
+        }
+
+        .post-install-list {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        .post-install-list li {
+            font-size: 0.85rem;
+            padding: 0.5rem 0 0.5rem 1.5rem;
+            position: relative;
+            color: var(--text);
+            border-bottom: 1px solid var(--border);
+        }
+
+        .post-install-list li:last-child {
+            border-bottom: none;
+        }
+
+        .post-install-list li::before {
+            content: '$';
+            position: absolute;
+            left: 0;
+            color: var(--accent);
+            font-weight: bold;
+        }
+    </style>
+</head>
+
+<body>
+    <canvas id="matrix-bg"></canvas>
+
+    <header>
+        <h1><a href="/">VULNERABLE TARGETS</a></h1>
+        <p>// Security Research Templates Catalog //</p>
+    </header>
+
+    <div class="detail-container">
+        <a href="/" class="back-link">← Back to catalog</a>
+        <div id="detail-content">
+            <div class="loading-detail">[ LOADING... ]</div>
+        </div>
+    </div>
+
+    <footer>
+        <a href="https://github.com/HappyHackingSpace" target="_blank">HappyHackingSpace</a> // 2026
+    </footer>
+
+    <script>
+        // Matrix rain
+        const canvas = document.getElementById('matrix-bg');
+        const ctx = canvas.getContext('2d');
+
+        function resizeCanvas() {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+        }
+        resizeCanvas();
+        window.addEventListener('resize', resizeCanvas);
+
+        const chars = 'アイウエオカキクケコ0123456789ABCDEF<>{}[]';
+        const charArray = chars.split('');
+        const fontSize = 14;
+        let columns = canvas.width / fontSize;
+        let drops = [];
+        for (let i = 0; i < columns; i++) drops[i] = Math.random() * -100;
+
+        function drawMatrix() {
+            ctx.fillStyle = 'rgba(0, 0, 0, 0.05)';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            ctx.fillStyle = '#404040';
+            ctx.font = fontSize + 'px monospace';
+            for (let i = 0; i < drops.length; i++) {
+                const char = charArray[Math.floor(Math.random() * charArray.length)];
+                ctx.fillText(char, i * fontSize, drops[i] * fontSize);
+                if (drops[i] * fontSize > canvas.height && Math.random() > 0.975) drops[i] = 0;
+                drops[i]++;
+            }
+        }
+        setInterval(drawMatrix, 50);
+
+        // Get ID from URL path (e.g., /VT-2026-1207 -> vt-2026-1207)
+        const pathParts = window.location.pathname.split('/').filter(p => p);
+        const templateId = pathParts.length > 0 ? pathParts[pathParts.length - 1].toLowerCase() : null;
+
+        if (!templateId) {
+            document.getElementById('detail-content').innerHTML = `
+                <div class="not-found">
+                    <h2>ERROR 400</h2>
+                    <p>No template ID specified.</p>
+                    <p style="margin-top: 1rem;"><a href="/">← Return to catalog</a></p>
+                </div>
+            `;
+        } else {
+            fetch('./assets/templates.json')
+                .then(res => res.json())
+                .then(templates => {
+                    const template = templates.find(t => t.id === templateId);
+                    if (!template) {
+                        document.getElementById('detail-content').innerHTML = `
+                            <div class="not-found">
+                                <h2>ERROR 404</h2>
+                                <p>Template "${templateId}" not found.</p>
+                                <p style="margin-top: 1rem;"><a href="/">← Return to catalog</a></p>
+                            </div>
+                        `;
+                        return;
+                    }
+
+                    document.title = `${template.info?.name || template.id} // VT`;
+                    renderDetail(template);
+                })
+                .catch(err => {
+                    document.getElementById('detail-content').innerHTML = `
+                        <div class="not-found">
+                            <h2>ERROR 500</h2>
+                            <p>Failed to load template data.</p>
+                        </div>
+                    `;
+                });
+        }
+
+        function renderDetail(t) {
+            const info = t.info || {};
+            const poc = t.poc || {};
+            const providers = t.providers || {};
+
+            document.getElementById('detail-content').innerHTML = `
+                <div class="detail-card">
+                    <div class="detail-header">
+                        <span class="detail-id">${t.id}</span>
+                        <span class="category ${t.category}">${t.category}</span>
+                    </div>
+
+                    <h1 class="detail-title">${info.name || t.id}</h1>
+
+                    <div class="detail-meta">
+                        ${info.cve ? `<div class="meta-item"><span class="label">CVE</span><span class="value danger">${info.cve}</span></div>` : ''}
+                        ${info.cwe ? `<div class="meta-item"><span class="label">CWE</span><span class="value">${info.cwe}</span></div>` : ''}
+                        ${info.cvss?.score ? `<div class="meta-item"><span class="label">CVSS Score</span><span class="value ${parseFloat(info.cvss.score) >= 7 ? 'danger' : ''}">${info.cvss.score}</span></div>` : ''}
+                        ${info.author ? `<div class="meta-item"><span class="label">Author</span><span class="value">${info.author}</span></div>` : ''}
+                        ${info.type ? `<div class="meta-item"><span class="label">Type</span><span class="value">${info.type}</span></div>` : ''}
+                        ${info.difficulty ? `<div class="meta-item"><span class="label">Difficulty</span><span class="value difficulty-${info.difficulty.toLowerCase()}">${info.difficulty}</span></div>` : ''}
+                    </div>
+
+                    <div class="detail-section">
+                        <span class="section-label">// Description</span>
+                        <p class="section-text">${info.description || 'No description available.'}</p>
+                    </div>
+
+                    ${t.technical ? `
+                    <div class="detail-section">
+                        <span class="section-label">// Technical Details</span>
+                        <p class="section-text">${t.technical}</p>
+                    </div>
+                    ` : ''}
+
+                    ${t.impact ? `
+                    <div class="detail-section">
+                        <span class="section-label">// Impact</span>
+                        <p class="section-text">${t.impact}</p>
+                    </div>
+                    ` : ''}
+
+                    ${t.remedy ? `
+                    <div class="detail-section">
+                        <span class="section-label">// Remedy</span>
+                        <p class="section-text">${t.remedy}</p>
+                    </div>
+                    ` : ''}
+
+                    ${info.targets?.length ? `
+                    <div class="detail-section">
+                        <span class="section-label">// Targets</span>
+                        <div class="tags">${info.targets.map(t => `<span class="tag">${t}</span>`).join('')}</div>
+                    </div>
+                    ` : ''}
+
+                    ${info.tags?.length ? `
+                    <div class="detail-section">
+                        <span class="section-label">// Tags</span>
+                        <div class="tags">${info.tags.map(tag =>
+                `<span class="tag ${['cve', 'xss', 'sqli', 'rce', 'ssrf', 'lfi', 'rfi'].includes(tag.toLowerCase()) ? 'danger' : ''}">${tag}</span>`
+            ).join('')}</div>
+                    </div>
+                    ` : ''}
+
+                    ${info.affected_versions?.length ? `
+                    <div class="detail-section">
+                        <span class="section-label">// Affected Versions</span>
+                        <p class="section-text">${info.affected_versions.join(', ')}</p>
+                    </div>
+                    ` : ''}
+
+                    ${info.fixed_version ? `
+                    <div class="detail-section">
+                        <span class="section-label">// Fixed Version</span>
+                        <p class="section-text">${info.fixed_version}</p>
+                    </div>
+                    ` : ''}
+
+                    ${poc.nuclei?.length || poc.semgrep?.length || poc.bambda?.length ? `
+                    <div class="detail-section">
+                        <span class="section-label">// PoC Files</span>
+                        <div class="poc-files">
+                            ${poc.nuclei?.map(f => `<a href="https://github.com/omarkurt/vt-templates/blob/main/cves/${t.id}/${f}" target="_blank" rel="noopener" class="poc-file nuclei">nuclei: ${f}</a>`).join('') || ''}
+                            ${poc.bambda?.map(f => `<a href="https://github.com/omarkurt/vt-templates/blob/main/cves/${t.id}/${f}" target="_blank" rel="noopener" class="poc-file bambda">bambda: ${f}</a>`).join('') || ''}
+                            ${poc.semgrep?.map(f => `<a href="https://github.com/omarkurt/vt-templates/blob/main/cves/${t.id}/${f}" target="_blank" rel="noopener" class="poc-file semgrep">semgrep: ${f}</a>`).join('') || ''}
+                        </div>
+                    </div>
+                    ` : ''}
+
+                    ${providers['docker-compose'] ? `
+                    <div class="detail-section post-install-section">
+                        <span class="section-label">// VT CLI</span>
+                        <ul class="post-install-list">
+                            <li>./vt start --id ${t.id} --provider docker-compose</li>
+                            <li>./vt info --id ${t.id}</li>
+                            <li>./vt stop --id ${t.id}</li>
+                        </ul>
+                    </div>
+                    ` : ''}
+
+                    ${info.cvss?.metrics ? `
+                    <div class="detail-section">
+                        <span class="section-label">// CVSS Metrics</span>
+                        <code class="code-block">${info.cvss.metrics}</code>
+                    </div>
+                    ` : ''}
+
+                    ${info.references?.length ? `
+                    <div class="detail-section">
+                        <span class="section-label">// References</span>
+                        <ul class="ref-list">${info.references.map(ref =>
+                `<li><a href="${ref}" target="_blank" rel="noopener">${ref}</a></li>`
+            ).join('')}</ul>
+                    </div>
+                    ` : ''}
+
+                    ${t['post-install']?.length ? `
+                    <div class="detail-section post-install-section">
+                        <span class="section-label">// Quick Start</span>
+                        <ul class="post-install-list">${t['post-install'].map(step =>
+                `<li>${step}</li>`
+            ).join('')}</ul>
+                    </div>
+                    ` : ''}
+
+                    <div class="detail-actions">
+                        <button class="btn btn-secondary" onclick="copyLink()">COPY LINK</button>
+                        <a href="/" class="btn btn-primary">← BACK TO CATALOG</a>
+                    </div>
+                </div>
+            `;
+        }
+
+        function copyLink() {
+            navigator.clipboard.writeText(window.location.href).then(() => {
+                const btn = document.querySelector('.btn-secondary');
+                btn.textContent = 'COPIED!';
+                setTimeout(() => btn.textContent = 'COPY LINK', 2000);
+            });
+        }
+    </script>
+</body>
+
+</html>
