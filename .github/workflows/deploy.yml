@@ -28,6 +28,14 @@ jobs:
           mkdir -p assets
           curl -sL https://raw.githubusercontent.com/HappyHackingSpace/vt-templates/main/.assets/templates.json -o assets/templates.json
 
+      - name: Commit updated templates.json
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add assets/templates.json
+          git diff --staged --quiet || git commit -m "chore: sync templates.json from vt-templates"
+          git push
+
       - name: Setup Pages
         uses: actions/configure-pages@v4
 
