@@ -4,7 +4,28 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Vulnerable Target // Security Research Templates</title>
+    <title>Details - Vulnerable Targets (VT) // Next-gen vuln testing platform</title>
+
+    <!-- SEO Meta Tags -->
+    <meta name="description"
+        content="Detailed technical analysis, Proof-of-Concept (PoC), and installation guide for a specific vulnerable target.">
+    <meta name="keywords" content="cve detail, vulnerability analysis, poc exploit, security template, docker install">
+    <meta name="author" content="HappyHackingSpace">
+    <meta name="robots" content="index, follow">
+
+    <!-- Open Graph / Facebook -->
+    <meta property="og:type" content="article">
+    <meta property="og:title" content="Vulnerable Target Details // VT">
+    <meta property="og:description" content="View technical details, impact, and remediation for this vulnerability.">
+    <meta property="og:image" content="https://vulnerabletarget.com/assets/images/og-image.png">
+
+    <!-- Twitter -->
+    <meta property="twitter:card" content="summary_large_image">
+    <meta property="twitter:title" content="Vulnerable Target Details // VT">
+    <meta property="twitter:description"
+        content="View technical details, impact, and remediation for this vulnerability.">
+    <meta property="twitter:image" content="https://vulnerabletarget.com/assets/images/og-image.png">
+
     <link rel="stylesheet" href="assets/css/style.css">
     <link rel="icon"
         href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>💀</text></svg>">
@@ -414,7 +435,23 @@
                         return;
                     }
 
-                    document.title = `${template.info?.name || template.id} // VT`;
+                    const pageTitle = `${template.info?.name || template.id} // VT`;
+                    const pageDesc = (template.info?.description || "Technical analysis and PoC for " + template.id).substring(0, 150) + "...";
+
+                    document.title = pageTitle;
+
+                    // Update Dynamic Meta Tags
+                    const setMeta = (selector, content) => {
+                        const el = document.querySelector(selector);
+                        if (el) el.setAttribute('content', content);
+                    };
+
+                    setMeta('meta[name="description"]', pageDesc);
+                    setMeta('meta[property="og:title"]', pageTitle);
+                    setMeta('meta[property="og:description"]', pageDesc);
+                    setMeta('meta[name="twitter:title"]', pageTitle);
+                    setMeta('meta[name="twitter:description"]', pageDesc);
+
                     renderDetail(template);
                 })
                 .catch(err => {
