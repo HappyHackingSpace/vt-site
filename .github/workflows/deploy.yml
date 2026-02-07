@@ -7,11 +7,9 @@ on:
   repository_dispatch:
     types: [templates-updated]
   workflow_dispatch:
-  schedule:
-    - cron: '0 0 * * *' # Daily update
 
 permissions:
-  contents: write
+  contents: read
   pages: write
   id-token: write
 
@@ -25,18 +23,18 @@ jobs:
       - name: Checkout site repo
         uses: actions/checkout@v4
 
-      - name: Fetch templates.json
+      - name: Checkout vt-templates for data
+        uses: actions/checkout@v4
+        with:
+          repository: HappyHackingSpace/vt-templates
+          path: vt-templates-data
+          fetch-depth: 1
+      
+      - name: Prep assets
         run: |
           mkdir -p assets
-          curl -sL https://raw.githubusercontent.com/HappyHackingSpace/vt-templates/main/.assets/templates.json -o assets/templates.json
-
-      - name: Commit updated templates.json
-        run: |
-          git config user.name "github-actions[bot]"
-          git config user.email "github-actions[bot]@users.noreply.github.com"
-          git add assets/templates.json
-          git diff --staged --quiet || git commit -m "chore: sync templates.json from vt-templates"
-          git push
+          cp vt-templates-data/.assets/templates.json assets/templates.json
+          rm -rf vt-templates-data
 
       - name: Setup Pages
         uses: actions/configure-pages@v4
