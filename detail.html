@@ -739,13 +739,6 @@
                         <span class="section-label">// Exploit Chain</span>
                         ${items.map((v, idx) => `
                         ${items.length > 1 ? `<div class="http-step-label">Step ${idx + 1}${v.name ? ': ' + escapeHtml(v.name) : ''}</div>` : ''}
-                        ${v.endpoint || v.method || v.param ? `
-                        <div class="http-endpoint-info">
-                            ${v.endpoint ? `<div class="ep-item"><span class="ep-label">Endpoint:</span><span class="ep-value">${escapeHtml(v.endpoint)}</span></div>` : ''}
-                            ${v.method ? `<div class="ep-item"><span class="ep-label">Method:</span><span class="ep-value">${v.method}</span></div>` : ''}
-                            ${v.param ? `<div class="ep-item"><span class="ep-label">Param:</span><span class="ep-value vuln">${escapeHtml(v.param)}</span></div>` : ''}
-                        </div>
-                        ` : ''}
                         <div class="http-exchange">
                             ${v.request ? renderHttpBlock('request', v.request, v.method || 'GET', idx) : ''}
                             ${v.request && v.response ? '<div class="http-arrow">▼ ▼ ▼</div>' : ''}
