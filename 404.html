@@ -553,6 +553,14 @@
         .hl-body {
             color: var(--text-dim);
         }
+
+        .hl-danger {
+            color: #ef4444;
+            font-weight: bold;
+            background: rgba(239, 68, 68, 0.1);
+            padding: 0 0.15rem;
+            border-radius: 2px;
+        }
     </style>
 </head>
 
@@ -700,9 +708,9 @@
                         ${items.map((v, idx) => `
                         ${items.length > 1 ? `<div class="http-step-label">Step ${idx + 1}${v.name ? ': ' + escapeHtml(v.name) : ''}</div>` : ''}
                         <div class="http-exchange">
-                            ${v.request ? renderHttpBlock('request', v.request, v.method || 'GET', idx) : ''}
+                            ${v.request ? renderHttpBlock('request', v.request, v.method || 'GET', idx, v.highlight) : ''}
                             ${v.request && v.response ? '<div class="http-arrow">▼ ▼ ▼</div>' : ''}
-                            ${v.response ? renderHttpBlock('response', v.response, null, idx) : ''}
+                            ${v.response ? renderHttpBlock('response', v.response, null, idx, v.highlight) : ''}
                         </div>
                         `).join('')}
                     </div>`;
@@ -809,9 +817,9 @@
             return s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
         }
 
-        function highlightHttp(raw, type) {
+        function highlightHttp(raw, type, highlights) {
             const lines = escapeHtml(raw).split('\n');
-            return lines.map((line, i) => {
+            let result = lines.map((line, i) => {
                 if (i === 0 && type === 'request') {
                     return line.replace(/^(GET|POST|PUT|DELETE|PATCH|HEAD|OPTIONS)(\s+)(\S+)(\s+HTTP\/\S+)?/,
                         '<span class="hl-method">$1</span>$2<span class="hl-url">$3</span><span class="hl-version">$4</span>');
@@ -829,10 +837,17 @@
                 }
                 return `<span class="hl-body">${line}</span>`;
             }).join('\n');
+            if (highlights && highlights.length) {
+                highlights.forEach(h => {
+                    const escaped = escapeHtml(h);
+                    result = result.split(escaped).join(`<span class="hl-danger">${escaped}</span>`);
+                });
+            }
+            return result;
         }
 
         let _httpBlockId = 0;
-        function renderHttpBlock(type, raw, method, idx) {
+        function renderHttpBlock(type, raw, method, idx, highlights) {
             const id = 'http-b-' + (idx !== undefined ? idx + '-' : '') + (++_httpBlockId);
             const isReq = type === 'request';
             let badge = '';
@@ -854,7 +869,7 @@
                     <div class="http-block-label"><span>${isReq ? 'Request' : 'Response'}</span>${badge}</div>
                     <button class="http-copy" onclick="copyHttp(this,'${id}')">Copy</button>
                 </div>
-                <div class="http-content"><pre id="${id}">${highlightHttp(raw.trim(), type)}</pre></div>
+                <div class="http-content"><pre id="${id}">${highlightHttp(raw.trim(), type, highlights)}</pre></div>
             </div>`;
         }
 
