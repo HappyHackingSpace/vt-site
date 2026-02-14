@@ -331,6 +331,228 @@
             color: var(--accent);
             font-weight: bold;
         }
+
+        /* HTTP Viewer */
+        .http-viewer {
+            margin: 1.5rem 0;
+        }
+
+        .http-step-label {
+            font-size: 0.7rem;
+            font-weight: bold;
+            letter-spacing: 0.12em;
+            text-transform: uppercase;
+            color: var(--primary);
+            margin: 1.5rem 0 0.5rem 0;
+            padding-bottom: 0.4rem;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .http-step-label:first-of-type {
+            margin-top: 0.5rem;
+        }
+
+        .http-exchange {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        .http-block {
+            background: var(--surface-hover);
+            border: 1px solid var(--border);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .http-block-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0.5rem 0.75rem;
+            border-bottom: 1px solid var(--border);
+            background: rgba(255, 255, 255, 0.015);
+        }
+
+        .http-block-label {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .http-block-label span {
+            font-size: 0.6rem;
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+            color: var(--text-dim);
+        }
+
+        .http-method {
+            font-size: 0.6rem;
+            font-weight: bold;
+            padding: 0.1rem 0.4rem;
+            letter-spacing: 0.05em;
+            border: 1px solid;
+        }
+
+        .http-method.get {
+            color: #22c55e;
+            border-color: #22c55e;
+        }
+
+        .http-method.post {
+            color: var(--info);
+            border-color: var(--info);
+        }
+
+        .http-method.put {
+            color: var(--warning);
+            border-color: var(--warning);
+        }
+
+        .http-method.delete {
+            color: var(--danger);
+            border-color: var(--danger);
+        }
+
+        .http-status {
+            font-size: 0.6rem;
+            font-weight: bold;
+            padding: 0.1rem 0.4rem;
+            letter-spacing: 0.05em;
+            border: 1px solid;
+        }
+
+        .http-status.s2xx {
+            color: #22c55e;
+            border-color: #22c55e;
+        }
+
+        .http-status.s3xx {
+            color: var(--warning);
+            border-color: var(--warning);
+        }
+
+        .http-status.s4xx {
+            color: var(--danger);
+            border-color: var(--danger);
+        }
+
+        .http-status.s5xx {
+            color: var(--danger);
+            border-color: var(--danger);
+        }
+
+        .http-content {
+            padding: 0.75rem;
+        }
+
+        .http-content pre {
+            margin: 0;
+            font-size: 0.75rem;
+            line-height: 1.5;
+            white-space: pre-wrap;
+            word-break: break-all;
+            color: var(--text);
+        }
+
+        .http-copy {
+            font-family: inherit;
+            font-size: 0.55rem;
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+            background: transparent;
+            border: 1px solid var(--border);
+            color: var(--text-dim);
+            padding: 0.15rem 0.5rem;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .http-copy:hover {
+            border-color: var(--text);
+            color: var(--text);
+        }
+
+        .http-copy.copied {
+            border-color: #22c55e;
+            color: #22c55e;
+        }
+
+        .http-arrow {
+            text-align: center;
+            color: var(--text-dim);
+            font-size: 0.7rem;
+            letter-spacing: 0.3em;
+        }
+
+        .http-endpoint-info {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 1rem;
+            padding: 0.5rem 0.75rem;
+            border: 1px solid var(--border);
+            background: rgba(255, 255, 255, 0.02);
+            margin-bottom: 1rem;
+            font-size: 0.75rem;
+        }
+
+        .ep-item {
+            display: flex;
+            gap: 0.4rem;
+            align-items: center;
+        }
+
+        .ep-label {
+            color: var(--text-dim);
+            text-transform: uppercase;
+            font-size: 0.6rem;
+            letter-spacing: 0.08em;
+        }
+
+        .ep-value {
+            color: var(--text);
+            font-weight: bold;
+        }
+
+        .ep-value.vuln {
+            color: var(--danger);
+        }
+
+        .hl-method {
+            color: #22c55e;
+            font-weight: bold;
+        }
+
+        .hl-url {
+            color: var(--info);
+        }
+
+        .hl-version {
+            color: var(--text-dim);
+        }
+
+        .hl-header-name {
+            color: var(--accent);
+        }
+
+        .hl-header-val {
+            color: var(--text);
+        }
+
+        .hl-status-ok {
+            color: #22c55e;
+            font-weight: bold;
+        }
+
+        .hl-status-err {
+            color: var(--danger);
+            font-weight: bold;
+        }
+
+        .hl-body {
+            color: var(--text-dim);
+        }
     </style>
 </head>
 
@@ -462,6 +684,37 @@
                     </div>
                     ` : ''}
 
+                    ${(() => {
+                    const vulns = t.vulnerabilities;
+                    if (!vulns) return '';
+                    let items = [];
+                    if (Array.isArray(vulns)) {
+                        items = vulns.filter(v => v.request || v.response);
+                    } else if (vulns.request || vulns.response) {
+                        items = [vulns];
+                    }
+                    if (items.length === 0) return '';
+                    return `
+                    <div class="detail-section http-viewer">
+                        <span class="section-label">// Exploit Chain</span>
+                        ${items.map((v, idx) => `
+                        ${items.length > 1 ? `<div class="http-step-label">Step ${idx + 1}${v.name ? ': ' + escapeHtml(v.name) : ''}</div>` : ''}
+                        ${v.endpoint || v.method || v.param ? `
+                        <div class="http-endpoint-info">
+                            ${v.endpoint ? `<div class="ep-item"><span class="ep-label">Endpoint:</span><span class="ep-value">${escapeHtml(v.endpoint)}</span></div>` : ''}
+                            ${v.method ? `<div class="ep-item"><span class="ep-label">Method:</span><span class="ep-value">${v.method}</span></div>` : ''}
+                            ${v.param ? `<div class="ep-item"><span class="ep-label">Param:</span><span class="ep-value vuln">${escapeHtml(v.param)}</span></div>` : ''}
+                        </div>
+                        ` : ''}
+                        <div class="http-exchange">
+                            ${v.request ? renderHttpBlock('request', v.request, v.method || 'GET', idx) : ''}
+                            ${v.request && v.response ? '<div class="http-arrow">▼ ▼ ▼</div>' : ''}
+                            ${v.response ? renderHttpBlock('response', v.response, null, idx) : ''}
+                        </div>
+                        `).join('')}
+                    </div>`;
+                })()}
+
                     ${t.impact ? `
                     <div class="detail-section">
                         <span class="section-label">// Impact</span>
@@ -487,8 +740,8 @@
                     <div class="detail-section">
                         <span class="section-label">// Tags</span>
                         <div class="tags">${info.tags.map(tag =>
-                `<span class="tag ${['cve', 'xss', 'sqli', 'rce', 'ssrf', 'lfi', 'rfi'].includes(tag.toLowerCase()) ? 'danger' : ''}">${tag}</span>`
-            ).join('')}</div>
+                    `<span class="tag ${['cve', 'xss', 'sqli', 'rce', 'ssrf', 'lfi', 'rfi'].includes(tag.toLowerCase()) ? 'danger' : ''}">${tag}</span>`
+                ).join('')}</div>
                     </div>
                     ` : ''}
 
@@ -537,8 +790,8 @@
                     <div class="detail-section">
                         <span class="section-label">// References</span>
                         <ul class="ref-list">${(t.references || info.references).map(ref =>
-                `<li><a href="${ref}" target="_blank" rel="noopener">${ref}</a></li>`
-            ).join('')}</ul>
+                    `<li><a href="${ref}" target="_blank" rel="noopener">${ref}</a></li>`
+                ).join('')}</ul>
                     </div>
                     ` : ''}
 
@@ -546,8 +799,8 @@
                     <div class="detail-section post-install-section">
                         <span class="section-label">// Quick Start</span>
                         <ul class="post-install-list">${t['post-install'].map(step =>
-                `<li>${step}</li>`
-            ).join('')}</ul>
+                    `<li>${step}</li>`
+                ).join('')}</ul>
                     </div>
                     ` : ''}
 
@@ -557,6 +810,69 @@
                     </div>
                 </div>
             `;
+        }
+
+        function escapeHtml(s) {
+            return s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+        }
+
+        function highlightHttp(raw, type) {
+            const lines = escapeHtml(raw).split('\n');
+            return lines.map((line, i) => {
+                if (i === 0 && type === 'request') {
+                    return line.replace(/^(GET|POST|PUT|DELETE|PATCH|HEAD|OPTIONS)(\s+)(\S+)(\s+HTTP\/\S+)?/,
+                        '<span class="hl-method">$1</span>$2<span class="hl-url">$3</span><span class="hl-version">$4</span>');
+                }
+                if (i === 0 && type === 'response') {
+                    return line.replace(/^(HTTP\/\S+)\s+(\d{3})\s*(.*)/,
+                        (m, ver, code, text) => {
+                            const cls = code.startsWith('2') ? 'hl-status-ok' : 'hl-status-err';
+                            return `<span class="hl-version">${ver}</span> <span class="${cls}">${code} ${text}</span>`;
+                        });
+                }
+                if (line.match(/^[A-Za-z][A-Za-z0-9-]*:/)) {
+                    const idx = line.indexOf(':');
+                    return `<span class="hl-header-name">${line.substring(0, idx)}</span>:<span class="hl-header-val">${line.substring(idx + 1)}</span>`;
+                }
+                return `<span class="hl-body">${line}</span>`;
+            }).join('\n');
+        }
+
+        let _httpBlockId = 0;
+        function renderHttpBlock(type, raw, method, idx) {
+            const id = 'http-b-' + (idx !== undefined ? idx + '-' : '') + (++_httpBlockId);
+            const isReq = type === 'request';
+            let badge = '';
+            if (isReq) {
+                const m = (method || 'GET').toUpperCase();
+                const cls = { GET: 'get', POST: 'post', PUT: 'put', DELETE: 'delete' }[m] || 'get';
+                badge = `<span class="http-method ${cls}">${m}</span>`;
+            } else {
+                const statusMatch = raw.match(/HTTP\/\S+\s+(\d{3})\s*(.*)/);
+                if (statusMatch) {
+                    const code = statusMatch[1];
+                    const text = statusMatch[2] || '';
+                    const cls = code.startsWith('2') ? 's2xx' : code.startsWith('3') ? 's3xx' : code.startsWith('4') ? 's4xx' : 's5xx';
+                    badge = `<span class="http-status ${cls}">${code} ${text}</span>`;
+                }
+            }
+            return `<div class="http-block">
+                <div class="http-block-header">
+                    <div class="http-block-label"><span>${isReq ? 'Request' : 'Response'}</span>${badge}</div>
+                    <button class="http-copy" onclick="copyHttp(this,'${id}')">Copy</button>
+                </div>
+                <div class="http-content"><pre id="${id}">${highlightHttp(raw.trim(), type)}</pre></div>
+            </div>`;
+        }
+
+        function copyHttp(btn, preId) {
+            const pre = document.getElementById(preId);
+            const text = pre.textContent || pre.innerText;
+            navigator.clipboard.writeText(text).then(() => {
+                btn.textContent = 'Copied!';
+                btn.classList.add('copied');
+                setTimeout(() => { btn.textContent = 'Copy'; btn.classList.remove('copied'); }, 2000);
+            });
         }
 
         function copyLink() {
