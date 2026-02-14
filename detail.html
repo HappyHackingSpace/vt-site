@@ -152,6 +152,21 @@
             margin: 1.5rem 0;
         }
 
+        .http-step-label {
+            font-size: 0.7rem;
+            font-weight: bold;
+            letter-spacing: 0.12em;
+            text-transform: uppercase;
+            color: var(--primary);
+            margin: 1.5rem 0 0.5rem 0;
+            padding-bottom: 0.4rem;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .http-step-label:first-of-type {
+            margin-top: 0.5rem;
+        }
+
         .http-exchange {
             display: flex;
             flex-direction: column;
@@ -708,23 +723,37 @@
                     </div>
                     ` : ''}
 
-                    ${t.vulnerabilities?.request || t.vulnerabilities?.response ? `
+                    ${(() => {
+                    // Normalize vulnerabilities: support both object and array formats
+                    const vulns = t.vulnerabilities;
+                    if (!vulns) return '';
+                    let items = [];
+                    if (Array.isArray(vulns)) {
+                        items = vulns.filter(v => v.request || v.response);
+                    } else if (vulns.request || vulns.response) {
+                        items = [vulns];
+                    }
+                    if (items.length === 0) return '';
+                    return `
                     <div class="detail-section http-viewer">
                         <span class="section-label">// Exploit Chain</span>
-                        ${t.vulnerabilities.endpoint || t.vulnerabilities.method || t.vulnerabilities.param ? `
+                        ${items.map((v, idx) => `
+                        ${items.length > 1 ? `<div class="http-step-label">Step ${idx + 1}${v.name ? ': ' + escapeHtml(v.name) : ''}</div>` : ''}
+                        ${v.endpoint || v.method || v.param ? `
                         <div class="http-endpoint-info">
-                            ${t.vulnerabilities.endpoint ? `<div class="ep-item"><span class="ep-label">Endpoint:</span><span class="ep-value">${t.vulnerabilities.endpoint}</span></div>` : ''}
-                            ${t.vulnerabilities.method ? `<div class="ep-item"><span class="ep-label">Method:</span><span class="ep-value">${t.vulnerabilities.method}</span></div>` : ''}
-                            ${t.vulnerabilities.param ? `<div class="ep-item"><span class="ep-label">Param:</span><span class="ep-value vuln">${t.vulnerabilities.param}</span></div>` : ''}
+                            ${v.endpoint ? `<div class="ep-item"><span class="ep-label">Endpoint:</span><span class="ep-value">${escapeHtml(v.endpoint)}</span></div>` : ''}
+                            ${v.method ? `<div class="ep-item"><span class="ep-label">Method:</span><span class="ep-value">${v.method}</span></div>` : ''}
+                            ${v.param ? `<div class="ep-item"><span class="ep-label">Param:</span><span class="ep-value vuln">${escapeHtml(v.param)}</span></div>` : ''}
                         </div>
                         ` : ''}
                         <div class="http-exchange">
-                            ${t.vulnerabilities.request ? renderHttpBlock('request', t.vulnerabilities.request, t.vulnerabilities.method || 'GET') : ''}
-                            ${t.vulnerabilities.request && t.vulnerabilities.response ? '<div class="http-arrow">▼ ▼ ▼</div>' : ''}
-                            ${t.vulnerabilities.response ? renderHttpBlock('response', t.vulnerabilities.response) : ''}
+                            ${v.request ? renderHttpBlock('request', v.request, v.method || 'GET', idx) : ''}
+                            ${v.request && v.response ? '<div class="http-arrow">▼ ▼ ▼</div>' : ''}
+                            ${v.response ? renderHttpBlock('response', v.response, null, idx) : ''}
                         </div>
-                    </div>
-                    ` : ''}
+                        `).join('')}
+                    </div>`;
+                })()}
 
                     ${t.impact ? `
                     <div class="detail-section">
@@ -751,8 +780,8 @@
                     <div class="detail-section">
                         <span class="section-label">// Tags</span>
                         <div class="tags">${info.tags.map(tag =>
-                `<span class="tag ${['cve', 'xss', 'sqli', 'rce', 'ssrf', 'lfi', 'rfi'].includes(tag.toLowerCase()) ? 'danger' : ''}">${tag}</span>`
-            ).join('')}</div>
+                    `<span class="tag ${['cve', 'xss', 'sqli', 'rce', 'ssrf', 'lfi', 'rfi'].includes(tag.toLowerCase()) ? 'danger' : ''}">${tag}</span>`
+                ).join('')}</div>
                     </div>
                     ` : ''}
 
@@ -801,8 +830,8 @@
                     <div class="detail-section">
                         <span class="section-label">// References</span>
                         <ul class="ref-list">${(t.references || info.references).map(ref =>
-                `<li><a href="${ref}" target="_blank" rel="noopener">${ref}</a></li>`
-            ).join('')}</ul>
+                    `<li><a href="${ref}" target="_blank" rel="noopener">${ref}</a></li>`
+                ).join('')}</ul>
                     </div>
                     ` : ''}
 
@@ -810,8 +839,8 @@
                     <div class="detail-section post-install-section">
                         <span class="section-label">// Quick Start</span>
                         <ul class="post-install-list">${t['post-install'].map(step =>
-                `<li>${step}</li>`
-            ).join('')}</ul>
+                    `<li>${step}</li>`
+                ).join('')}</ul>
                     </div>
                     ` : ''}
 
@@ -849,8 +878,8 @@
         }
 
         let _httpBlockId = 0;
-        function renderHttpBlock(type, raw, method) {
-            const id = 'http-b-' + (++_httpBlockId);
+        function renderHttpBlock(type, raw, method, idx) {
+            const id = 'http-b-' + (idx !== undefined ? idx + '-' : '') + (++_httpBlockId);
             const isReq = type === 'request';
             let badge = '';
             if (isReq) {
