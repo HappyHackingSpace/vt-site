@@ -662,10 +662,18 @@
             const poc = t.poc || {};
             const providers = t.providers || {};
 
+            // Format ID: VT- prefix uppercase, rest as-is
+            function formatId(id) {
+                if (id && id.toLowerCase().startsWith('vt-')) {
+                    return 'VT-' + id.substring(3);
+                }
+                return id;
+            }
+
             document.getElementById('detail-content').innerHTML = `
                 <div class="detail-card">
                     <div class="detail-header">
-                        <span class="detail-id">${t.id}</span>
+                        <span class="detail-id">${formatId(t.id)}</span>
                         <span class="category ${t.category}">${t.category}</span>
                     </div>
 
@@ -764,9 +772,9 @@
                     <div class="detail-section">
                         <span class="section-label">// PoC Files</span>
                         <div class="poc-files">
-                            ${poc.nuclei?.map(f => `<a href="https://github.com/happyhackingspace/vt-templates/blob/main/cves/${t.id}/${f}" target="_blank" rel="noopener" class="poc-file nuclei">nuclei: ${f}</a>`).join('') || ''}
-                            ${poc.bambda?.map(f => `<a href="https://github.com/happyhackingspace/vt-templates/blob/main/cves/${t.id}/${f}" target="_blank" rel="noopener" class="poc-file bambda">bambda: ${f}</a>`).join('') || ''}
-                            ${poc.semgrep?.map(f => `<a href="https://github.com/happyhackingspace/vt-templates/blob/main/cves/${t.id}/${f}" target="_blank" rel="noopener" class="poc-file semgrep">semgrep: ${f}</a>`).join('') || ''}
+                            ${poc.nuclei?.map(f => `<a href="https://github.com/happyhackingspace/vt-templates/blob/main/${t.category || 'cves'}/${t.id}/${f}" target="_blank" rel="noopener" class="poc-file nuclei">nuclei: ${f}</a>`).join('') || ''}
+                            ${poc.bambda?.map(f => `<a href="https://github.com/happyhackingspace/vt-templates/blob/main/${t.category || 'cves'}/${t.id}/${f}" target="_blank" rel="noopener" class="poc-file bambda">bambda: ${f}</a>`).join('') || ''}
+                            ${poc.semgrep?.map(f => `<a href="https://github.com/happyhackingspace/vt-templates/blob/main/${t.category || 'cves'}/${t.id}/${f}" target="_blank" rel="noopener" class="poc-file semgrep">semgrep: ${f}</a>`).join('') || ''}
                         </div>
                     </div>
                     ` : ''}

@@ -153,6 +153,14 @@
             }
         });
 
+        // Format ID: VT- prefix uppercase, rest as-is
+        function formatId(id) {
+            if (id && id.toLowerCase().startsWith('vt-')) {
+                return 'VT-' + id.substring(3);
+            }
+            return id;
+        }
+
         // Load templates
         fetch('./assets/templates.json')
             .then(res => res.json())
@@ -189,9 +197,9 @@
             noResults.style.display = 'none';
             grid.innerHTML = templates.map(t => {
                 return `
-    <a href="/${t.id.toUpperCase()}" class="template-card">
+    <a href="/${formatId(t.id)}" class="template-card">
       <div class="template-header">
-        <span class="template-id">${t.id}</span>
+        <span class="template-id">${formatId(t.id)}</span>
         <div class="header-badges">
           ${t.info?.difficulty ? `<span class="difficulty difficulty-${t.info.difficulty.toLowerCase()}">${t.info.difficulty}</span>` : ''}
           <span class="category ${t.category}">${t.category}</span>
