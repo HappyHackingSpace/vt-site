@@ -346,7 +346,21 @@ main {
 
 
 .template-card:hover {
+  border-color: var(--accent);
+  background: var(--surface-hover);
+  box-shadow: 0 0 20px rgba(136, 136, 136, 0.1), inset 0 0 10px rgba(136, 136, 136, 0.05);
+  transform: translateY(-2px);
   text-decoration: none;
+}
+
+.template-card:hover .template-description,
+.template-card:hover .template-id {
+  color: var(--text);
+}
+
+.template-card:hover .template-name {
+  color: var(--text-bright);
+  text-shadow: 0 0 8px rgba(255, 255, 255, 0.3);
 }
 
 .template-header {
@@ -410,6 +424,7 @@ main {
   margin-bottom: 0.75rem;
   display: -webkit-box;
   -webkit-line-clamp: 2;
+  line-clamp: 2;
   -webkit-box-orient: vertical;
   overflow: hidden;
   line-height: 1.5;
@@ -423,11 +438,11 @@ main {
 }
 
 .tag {
-  font-size: 0.6rem;
-  padding: 0.15rem 0.4rem;
-  background: transparent;
-  border: 1px solid var(--text-dim);
-  color: var(--text-dim);
+  font-size: 0.7rem;
+  padding: 0.2rem 0.5rem;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid var(--border);
+  color: var(--text);
   text-transform: lowercase;
   letter-spacing: 0.05em;
   cursor: pointer;
@@ -437,6 +452,7 @@ main {
 .tag:hover {
   border-color: var(--accent);
   color: var(--accent);
+  background: rgba(136, 136, 136, 0.1);
 }
 
 .tag.cve {
