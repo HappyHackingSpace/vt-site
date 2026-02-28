@@ -639,15 +639,19 @@
         }
         setInterval(drawMatrix, 50);
 
-        // Get ID from URL
+        // Get ID from URL: support both ?id=xxx and /VT-xxx path formats
         const urlParams = new URLSearchParams(window.location.search);
-        const templateId = urlParams.get('id');
+        const paramId = urlParams.get('id');
+        const pathParts = window.location.pathname.split('/').filter(p => p);
+        const pathId = pathParts.length > 0 ? pathParts[pathParts.length - 1] : null;
+        const rawId = paramId || (pathId && pathId !== 'detail.html' ? pathId : null);
+        const templateId = rawId ? rawId.toLowerCase() : null;
 
-        if (!templateId) {
+        if (!templateId || !isValidId(templateId)) {
             document.getElementById('detail-content').innerHTML = `
                 <div class="not-found">
                     <h2>ERROR 400</h2>
-                    <p>No template ID specified.</p>
+                    <p>${!templateId ? 'No template ID specified.' : 'Invalid template ID format.'}</p>
                     <p style="margin-top: 1rem;"><a href="/">← Return to catalog</a></p>
                 </div>
             `;
@@ -660,7 +664,7 @@
                         document.getElementById('detail-content').innerHTML = `
                             <div class="not-found">
                                 <h2>ERROR 404</h2>
-                                <p>Template "${templateId}" not found.</p>
+                                <p>Template "${escapeHtml(templateId)}" not found.</p>
                                 <p style="margin-top: 1rem;"><a href="/">← Return to catalog</a></p>
                             </div>
                         `;
@@ -712,30 +716,30 @@
             document.getElementById('detail-content').innerHTML = `
                 <div class="detail-card">
                     <div class="detail-header">
-                        <span class="detail-id">${formatId(t.id)}</span>
-                        <span class="category ${t.category}">${t.category}</span>
+                        <span class="detail-id">${escapeHtml(formatId(t.id))}</span>
+                        <span class="category ${safeClass(t.category)}">${escapeHtml(t.category)}</span>
                     </div>
 
-                    <h1 class="detail-title">${info.name || t.id}</h1>
+                    <h1 class="detail-title">${escapeHtml(info.name || t.id)}</h1>
 
                     <div class="detail-meta">
-                        ${info.cve ? `<div class="meta-item"><span class="label">CVE</span><span class="value danger">${info.cve}</span></div>` : ''}
-                        ${info.cwe ? `<div class="meta-item"><span class="label">CWE</span><span class="value">${info.cwe}</span></div>` : ''}
-                        ${info.cvss?.score ? `<div class="meta-item"><span class="label">CVSS Score</span><span class="value ${parseFloat(info.cvss.score) >= 7 ? 'danger' : ''}">${info.cvss.score}</span></div>` : ''}
-                        ${info.author ? `<div class="meta-item"><span class="label">Author</span><span class="value">${info.author}</span></div>` : ''}
-                        ${info.type ? `<div class="meta-item"><span class="label">Type</span><span class="value">${info.type}</span></div>` : ''}
-                        ${info.difficulty ? `<div class="meta-item"><span class="label">Difficulty</span><span class="value difficulty-${info.difficulty.toLowerCase()}">${info.difficulty}</span></div>` : ''}
+                        ${info.cve ? `<div class="meta-item"><span class="label">CVE</span><span class="value danger">${escapeHtml(info.cve)}</span></div>` : ''}
+                        ${info.cwe ? `<div class="meta-item"><span class="label">CWE</span><span class="value">${escapeHtml(info.cwe)}</span></div>` : ''}
+                        ${info.cvss?.score ? `<div class="meta-item"><span class="label">CVSS Score</span><span class="value ${parseFloat(info.cvss.score) >= 7 ? 'danger' : ''}">${escapeHtml(info.cvss.score)}</span></div>` : ''}
+                        ${info.author ? `<div class="meta-item"><span class="label">Author</span><span class="value">${escapeHtml(info.author)}</span></div>` : ''}
+                        ${info.type ? `<div class="meta-item"><span class="label">Type</span><span class="value">${escapeHtml(info.type)}</span></div>` : ''}
+                        ${info.difficulty ? `<div class="meta-item"><span class="label">Difficulty</span><span class="value difficulty-${safeClass(info.difficulty.toLowerCase())}">${escapeHtml(info.difficulty)}</span></div>` : ''}
                     </div>
 
                     <div class="detail-section">
                         <span class="section-label">// Description</span>
-                        <p class="section-text">${info.description || 'No description available.'}</p>
+                        <p class="section-text">${escapeHtml(info.description || 'No description available.')}</p>
                     </div>
 
                     ${t.technical ? `
                     <div class="detail-section">
                         <span class="section-label">// Technical Details</span>
-                        <p class="section-text technical-text">${t.technical}</p>
+                        <p class="section-text technical-text">${escapeHtml(t.technical)}</p>
                     </div>
                     ` : ''}
 
@@ -767,21 +771,21 @@
                     ${t.impact ? `
                     <div class="detail-section">
                         <span class="section-label">// Impact</span>
-                        <p class="section-text">${t.impact}</p>
+                        <p class="section-text">${escapeHtml(t.impact)}</p>
                     </div>
                     ` : ''}
 
                     ${t.remedy ? `
                     <div class="detail-section">
                         <span class="section-label">// Remedy</span>
-                        <p class="section-text">${t.remedy}</p>
+                        <p class="section-text">${escapeHtml(t.remedy)}</p>
                     </div>
                     ` : ''}
 
                     ${info.targets?.length ? `
                     <div class="detail-section">
                         <span class="section-label">// Targets</span>
-                        <div class="tags">${info.targets.map(t => `<span class="tag">${t}</span>`).join('')}</div>
+                        <div class="tags">${info.targets.map(t => `<span class="tag">${escapeHtml(t)}</span>`).join('')}</div>
                     </div>
                     ` : ''}
 
@@ -789,7 +793,7 @@
                     <div class="detail-section">
                         <span class="section-label">// Tags</span>
                         <div class="tags">${info.tags.map(tag =>
-                    `<span class="tag ${['cve', 'xss', 'sqli', 'rce', 'ssrf', 'lfi', 'rfi'].includes(tag.toLowerCase()) ? 'danger' : ''}">${tag}</span>`
+                    `<span class="tag ${['cve', 'xss', 'sqli', 'rce', 'ssrf', 'lfi', 'rfi'].includes(tag.toLowerCase()) ? 'danger' : ''}">${escapeHtml(tag)}</span>`
                 ).join('')}</div>
                     </div>
                     ` : ''}
@@ -797,14 +801,14 @@
                     ${info.affected_versions?.length ? `
                     <div class="detail-section">
                         <span class="section-label">// Affected Versions</span>
-                        <p class="section-text">${info.affected_versions.join(', ')}</p>
+                        <p class="section-text">${escapeHtml(info.affected_versions.join(', '))}</p>
                     </div>
                     ` : ''}
 
                     ${info.fixed_version ? `
                     <div class="detail-section">
                         <span class="section-label">// Fixed Version</span>
-                        <p class="section-text">${info.fixed_version}</p>
+                        <p class="section-text">${escapeHtml(info.fixed_version)}</p>
                     </div>
                     ` : ''}
 
@@ -812,9 +816,9 @@
                     <div class="detail-section">
                         <span class="section-label">// PoC Files</span>
                         <div class="poc-files">
-                            ${poc.nuclei?.map(f => `<a href="https://github.com/happyhackingspace/vt-templates/blob/main/${t.category || 'cves'}/${t.id}/${f}" target="_blank" rel="noopener" class="poc-file nuclei">nuclei: ${f}</a>`).join('') || ''}
-                            ${poc.bambda?.map(f => `<a href="https://github.com/happyhackingspace/vt-templates/blob/main/${t.category || 'cves'}/${t.id}/${f}" target="_blank" rel="noopener" class="poc-file bambda">bambda: ${f}</a>`).join('') || ''}
-                            ${poc.semgrep?.map(f => `<a href="https://github.com/happyhackingspace/vt-templates/blob/main/${t.category || 'cves'}/${t.id}/${f}" target="_blank" rel="noopener" class="poc-file semgrep">semgrep: ${f}</a>`).join('') || ''}
+                            ${poc.nuclei?.map(f => `<a href="https://github.com/happyhackingspace/vt-templates/blob/main/${encodeURIComponent(t.category || 'cves')}/${encodeURIComponent(t.id)}/${encodeURIComponent(f)}" target="_blank" rel="noopener" class="poc-file nuclei">nuclei: ${escapeHtml(f)}</a>`).join('') || ''}
+                            ${poc.bambda?.map(f => `<a href="https://github.com/happyhackingspace/vt-templates/blob/main/${encodeURIComponent(t.category || 'cves')}/${encodeURIComponent(t.id)}/${encodeURIComponent(f)}" target="_blank" rel="noopener" class="poc-file bambda">bambda: ${escapeHtml(f)}</a>`).join('') || ''}
+                            ${poc.semgrep?.map(f => `<a href="https://github.com/happyhackingspace/vt-templates/blob/main/${encodeURIComponent(t.category || 'cves')}/${encodeURIComponent(t.id)}/${encodeURIComponent(f)}" target="_blank" rel="noopener" class="poc-file semgrep">semgrep: ${escapeHtml(f)}</a>`).join('') || ''}
                         </div>
                     </div>
                     ` : ''}
@@ -823,7 +827,7 @@
                     <div class="detail-section post-install-section">
                         <span class="section-label">// VT CLI</span>
                         <ul class="post-install-list">
-                            <li>./vt start --id ${t.id} --provider docker-compose</li>
+                            <li>./vt start --id ${escapeHtml(t.id)} --provider docker-compose</li>
                         </ul>
                     </div>
                     ` : ''}
@@ -831,16 +835,17 @@
                     ${info.cvss?.metrics ? `
                     <div class="detail-section">
                         <span class="section-label">// CVSS Metrics</span>
-                        <code class="code-block">${info.cvss.metrics}</code>
+                        <code class="code-block">${escapeHtml(info.cvss.metrics)}</code>
                     </div>
                     ` : ''}
 
                     ${t.references?.length || info.references?.length ? `
                     <div class="detail-section">
                         <span class="section-label">// References</span>
-                        <ul class="ref-list">${(t.references || info.references).map(ref =>
-                    `<li><a href="${ref}" target="_blank" rel="noopener">${ref}</a></li>`
-                ).join('')}</ul>
+                        <ul class="ref-list">${(t.references || info.references).map(ref => {
+                    const safeHref = /^https?:\/\//i.test(ref) ? escapeHtml(ref) : '#';
+                    return `<li><a href="${safeHref}" target="_blank" rel="noopener">${escapeHtml(ref)}</a></li>`;
+                }).join('')}</ul>
                     </div>
                     ` : ''}
 
@@ -848,7 +853,7 @@
                     <div class="detail-section post-install-section">
                         <span class="section-label">// Quick Start</span>
                         <ul class="post-install-list">${t['post-install'].map(step =>
-                    `<li>${step}</li>`
+                    `<li>${escapeHtml(step)}</li>`
                 ).join('')}</ul>
                     </div>
                     ` : ''}
@@ -862,7 +867,15 @@
         }
 
         function escapeHtml(s) {
-            return s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+            return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+        }
+
+        function safeClass(s) {
+            return String(s).replace(/[^a-zA-Z0-9_-]/g, '');
+        }
+
+        function isValidId(id) {
+            return typeof id === 'string' && /^[a-zA-Z0-9_-]+$/.test(id) && id.length <= 50;
         }
 
         function highlightHttp(raw, type, highlights) {
