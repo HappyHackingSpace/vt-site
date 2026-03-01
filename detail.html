@@ -816,9 +816,9 @@
                     <div class="detail-section">
                         <span class="section-label">// PoC Files</span>
                         <div class="poc-files">
-                            ${poc.nuclei?.map(f => `<a href="https://github.com/happyhackingspace/vt-templates/blob/main/${encodeURIComponent(t.category || 'cves')}/${encodeURIComponent(t.id)}/${encodeURIComponent(f)}" target="_blank" rel="noopener" class="poc-file nuclei">nuclei: ${escapeHtml(f)}</a>`).join('') || ''}
-                            ${poc.bambda?.map(f => `<a href="https://github.com/happyhackingspace/vt-templates/blob/main/${encodeURIComponent(t.category || 'cves')}/${encodeURIComponent(t.id)}/${encodeURIComponent(f)}" target="_blank" rel="noopener" class="poc-file bambda">bambda: ${escapeHtml(f)}</a>`).join('') || ''}
-                            ${poc.semgrep?.map(f => `<a href="https://github.com/happyhackingspace/vt-templates/blob/main/${encodeURIComponent(t.category || 'cves')}/${encodeURIComponent(t.id)}/${encodeURIComponent(f)}" target="_blank" rel="noopener" class="poc-file semgrep">semgrep: ${escapeHtml(f)}</a>`).join('') || ''}
+                            ${poc.nuclei?.map(f => `<a href="${buildRepoUrl(t.category, t.id, f)}" target="_blank" rel="noopener" class="poc-file nuclei">nuclei: ${escapeHtml(f)}</a>`).join('') || ''}
+                            ${poc.bambda?.map(f => `<a href="${buildRepoUrl(t.category, t.id, f)}" target="_blank" rel="noopener" class="poc-file bambda">bambda: ${escapeHtml(f)}</a>`).join('') || ''}
+                            ${poc.semgrep?.map(f => `<a href="${buildRepoUrl(t.category, t.id, f)}" target="_blank" rel="noopener" class="poc-file semgrep">semgrep: ${escapeHtml(f)}</a>`).join('') || ''}
                         </div>
                     </div>
                     ` : ''}
@@ -866,6 +866,12 @@
             `;
         }
 
+        // Configuration
+        const CONFIG = {
+            REPO_BASE_URL: 'https://github.com/happyhackingspace/vt-templates/blob/main',
+            REPO_RAW_URL: 'https://raw.githubusercontent.com/happyhackingspace/vt-templates/main'
+        };
+
         function escapeHtml(s) {
             return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#39;');
         }
@@ -876,6 +882,33 @@
 
         function isValidId(id) {
             return typeof id === 'string' && /^[a-zA-Z0-9_-]+$/.test(id) && id.length <= 50;
+        }
+
+        function isValidFilename(filename) {
+            // Allow alphanumeric, hyphen, underscore, dot (for extensions)
+            // Must not contain path traversal sequences
+            if (typeof filename !== 'string') return false;
+            if (filename.length === 0 || filename.length > 100) return false;
+            // Reject path traversal attempts
+            if (filename.includes('..') || filename.includes('/') || filename.includes('\\')) return false;
+            // Only allow safe characters
+            return /^[a-zA-Z0-9._-]+$/.test(filename);
+        }
+
+        function buildRepoUrl(category, templateId, filename) {
+            // Validate all components before building URL
+            if (!isValidId(templateId)) {
+                console.warn('Invalid template ID:', templateId);
+                return '#';
+            }
+            if (!isValidFilename(filename)) {
+                console.warn('Invalid filename:', filename);
+                return '#';
+            }
+            const safeCat = encodeURIComponent(category || 'cves');
+            const safeId = encodeURIComponent(templateId);
+            const safeFile = encodeURIComponent(filename);
+            return `${CONFIG.REPO_BASE_URL}/${safeCat}/${safeId}/${safeFile}`;
         }
 
         function highlightHttp(raw, type, highlights) {
