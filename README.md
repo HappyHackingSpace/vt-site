@@ -5,10 +5,6 @@
 
 > Next-generation vulnerability testing platform - A curated catalog of vulnerable applications, CVE PoCs, and security research templates.
 
-## 🚀 Live Demo
-
-**Website:** [https://vulnerabletarget.com](https://vulnerabletarget.com)
-
 ## 📋 About
 
 Vulnerable Targets (VT) is an open-source catalog designed for security researchers, penetration testers, and CTF enthusiasts. It provides:
@@ -31,32 +27,7 @@ vt-site/
 ├── CNAME              # Custom domain config
 └── .github/           # GitHub Actions workflows
 ```
-
-## 🛠️ Tech Stack
-
-- **Frontend:** Vanilla HTML5, CSS3, JavaScript
-- **Data:** JSON-based API (templates.json)
-- **Hosting:** GitHub Pages
-- **Domain:** Custom domain via CNAME
-
-## 🚀 Getting Started
-
-### Local Development
-
-```bash
-# Clone the repository
-git clone https://github.com/HappyHackingSpace/VT.git
-cd vt-site
-
-# Serve locally (Python 3)
-python -m http.server 8000
-
-# Or with Node.js
-npx serve .
-```
-
-Then open [http://localhost:8000](http://localhost:8000)
-
+ 
 ## 🤝 Contributing
 
 Contributions are welcome! Please feel free to submit a Pull Request.
