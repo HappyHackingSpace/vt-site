@@ -169,8 +169,39 @@
             return String(s).replace(/[^a-zA-Z0-9_-]/g, '');
         }
 
+        // Fetch with retry mechanism
+        async function fetchWithRetry(url, options = {}, maxRetries = 3) {
+            let lastError;
+            for (let i = 0; i < maxRetries; i++) {
+                try {
+                    const response = await fetch(url, options);
+                    if (!response.ok) {
+                        throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                    }
+                    return response;
+                } catch (err) {
+                    lastError = err;
+                    console.warn(`Fetch attempt ${i + 1} failed:`, err.message);
+                    if (i < maxRetries - 1) {
+                        const delay = Math.pow(2, i) * 1000; // 1s, 2s, 4s
+                        await new Promise(resolve => setTimeout(resolve, delay));
+                    }
+                }
+            }
+            throw lastError;
+        }
+
+        function showFetchError(message) {
+            document.getElementById('templates-grid').innerHTML = `
+                <div class="no-results" style="display:block; text-align:center;">
+                    <p style="color:var(--danger); margin-bottom:1rem;">⚠ ${escapeHtml(message)}</p>
+                    <button onclick="location.reload()" class="btn" style="padding:0.5rem 1.5rem;">↻ TRY AGAIN</button>
+                </div>
+            `;
+        }
+
         // Load templates
-        fetch('./assets/templates.json')
+        fetchWithRetry('./assets/templates.json')
             .then(res => res.json())
             .then(templates => {
                 window.templates = templates;
@@ -181,8 +212,8 @@
                 setupSearch();
             })
             .catch(err => {
-                console.error('Failed to load templates:', err);
-                document.getElementById('templates-grid').innerHTML = '<div class="no-results" style="display:block;">CONNECTION FAILED: Unable to load targets database.</div>';
+                console.error('Failed to load templates after retries:', err);
+                showFetchError('CONNECTION FAILED: Unable to load targets database.');
             });
 
         function renderStats(templates) {
