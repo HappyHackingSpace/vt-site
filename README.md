@@ -1,4 +1,4 @@
-# Vulnerable Targets (VT) 🎯
+# Vulnerable Targets Sites (vt-site) 🎯
 
 [![Website](https://img.shields.io/badge/Website-vulnerabletarget.com-red)](https://vulnerabletarget.com)
 [![License](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
@@ -7,7 +7,7 @@
 
 ## 📋 About
 
-Vulnerable Targets (VT) is an open-source catalog designed for security researchers, penetration testers, and CTF enthusiasts. It provides:
+Vulnerable Targets Sites (vt-site) is an open-source catalog designed for security researchers, penetration testers, and CTF enthusiasts. It provides:
 
 - 🛡️ **Vulnerable Applications** - Pre-configured vulnerable apps for practice
 - 🐛 **CVE PoCs** - Proof-of-Concept exploits for known vulnerabilities
@@ -24,7 +24,6 @@ vt-site/
 ├── assets/
 │   ├── css/style.css  # Styling
 │   └── templates.json # Vulnerability database
-├── CNAME              # Custom domain config
 └── .github/           # GitHub Actions workflows
 ```
  
