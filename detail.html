@@ -694,10 +694,18 @@
                 .then(templates => {
                     const template = templates.find(t => t.id === templateId);
                     if (!template) {
+                        const issueTitle = encodeURIComponent(`Missing template: ${templateId}`);
+                        const issueBody = encodeURIComponent(`## Template Not Found\n\nI couldn't find the template "${templateId}" on the website.\n\n**Expected:** Template page should load\n**Actual:** 404 - Template not found\n\nCould you please check if this template exists in the repository?`);
+                        const issueUrl = `https://github.com/happyhackingspace/vt-templates/issues/new?title=${issueTitle}&body=${issueBody}`;
+                        
                         document.getElementById('detail-content').innerHTML = `
                             <div class="not-found">
                                 <h2>ERROR 404</h2>
                                 <p>Template "${escapeHtml(templateId)}" not found.</p>
+                                <p style="margin-top: 1rem; color: var(--text-dim);">Can't find what you're looking for?</p>
+                                <p style="margin-top: 0.5rem;">
+                                    <a href="${issueUrl}" target="_blank" rel="noopener" style="color: var(--accent);">🐛 Report missing template on GitHub</a>
+                                </p>
                                 <p style="margin-top: 1rem;"><a href="/">← Return to catalog</a></p>
                             </div>
                         `;
