@@ -697,7 +697,7 @@
                         const issueTitle = encodeURIComponent(`Missing template: ${templateId}`);
                         const issueBody = encodeURIComponent(`## Template Not Found\n\nI couldn't find the template "${templateId}" on the website.\n\n**Expected:** Template page should load\n**Actual:** 404 - Template not found\n\nCould you please check if this template exists in the repository?`);
                         const issueUrl = `https://github.com/happyhackingspace/vt-templates/issues/new?title=${issueTitle}&body=${issueBody}`;
-                        
+
                         document.getElementById('detail-content').innerHTML = `
                             <div class="not-found">
                                 <h2>ERROR 404</h2>
@@ -864,7 +864,7 @@
                     <div class="detail-section post-install-section">
                         <span class="section-label">// VT CLI</span>
                         <ul class="post-install-list">
-                            <li>./vt start --id ${escapeHtml(t.id)} --provider docker-compose</li>
+                            <li>./vt start --id ${escapeHtml(t.id)}</li>
                         </ul>
                     </div>
                     ` : ''}
