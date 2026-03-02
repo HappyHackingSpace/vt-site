@@ -1,2 +1,7 @@
 .claude
 .planning
+
+# Generated at build time (CI)
+og/
+assets/images/
+vt-*/
