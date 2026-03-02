@@ -36,6 +36,11 @@ jobs:
           cp vt-templates-data/.assets/templates.json assets/templates.json
           rm -rf vt-templates-data
 
+      - name: Generate OG pages and images
+        run: |
+          pip install Pillow
+          python3 scripts/generate_pages.py
+
       - name: Setup Pages
         uses: actions/configure-pages@v4
 
