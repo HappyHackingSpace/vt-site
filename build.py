@@ -249,6 +249,7 @@ HEAD = """<!DOCTYPE html>
 <link rel="icon" href="/favicon.svg" type="image/svg+xml">
 <link rel="apple-touch-icon" href="/apple-touch-icon.png">
 <link rel="manifest" href="/site.webmanifest">
+<link rel="alternate" type="application/rss+xml" title="Vulnerable Target: new labs" href="/feed.xml">
 <meta name="theme-color" content="#0F1217">
 <meta name="color-scheme" content="dark">
 <title>{title}</title>
@@ -340,6 +341,7 @@ FOOTER = """<footer><div class="wrap">
       <h2>Explore</h2>
       <a href="https://github.com/HappyHackingSpace/vt-templates" target="_blank" rel="noopener">Templates</a>
       <a href="https://github.com/HappyHackingSpace/vt" target="_blank" rel="noopener">vt CLI</a>
+      <a href="/feed.xml"><svg class="rss" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 11a9 9 0 0 1 9 9"/><path d="M4 4a16 16 0 0 1 16 16"/><circle cx="5" cy="19" r="1.5"/></svg>New labs (RSS)</a>
     </div>
     <div class="fcol">
       <h2>Contribute</h2>
@@ -669,6 +671,12 @@ def render_home(ts):
             '<option value="sev">Severity</option><option value="id">ID</option></select>'
             f'<button type="button" class="pill clear" id="clear">Clear filters</button></div></div>')
     out += f'<h2 class="sr">Labs</h2><div class="grid" id="grid">{"".join(cards)}</div>'
+    # empty result: say what matched nothing and give the two ways forward (clear, or ask for the lab)
+    out += ('<div class="empty" id="empty" hidden><p class="empty-t" id="empty-t">No labs match these filters.</p>'
+            '<p class="empty-d">Check the ID, or try a product name, CVE or tag. If the lab does not exist yet, ask for it.</p>'
+            '<p class="nf-actions"><button type="button" class="btn" id="empty-clear">Clear search and filters</button>'
+            f'<a class="btn btn-ghost" id="empty-request" href="{e(ISSUES)}" target="_blank" rel="noopener">Request a lab</a></p></div>')
+    out += '<script>var VT_REQ=' + json.dumps({'issues': ISSUES, 'body': SEARCH_REQUEST_BODY}).replace('</', '<\\/') + ';</script>'
     out += '</div></main>'
     out += FOOTER.format(root='./', year=YEAR)
     out += """<script>
@@ -703,8 +711,17 @@ def render_home(ts):
       if(ok) for(var k in f){ if(f[k].indexOf(c.dataset[map[k]])<0){ok=false;break;} }
       c.style.display=ok?'':'none'; if(ok)n++;
     });
-    shown.textContent=n; sync();
+    shown.textContent=n; showEmpty(n); sync();
   }
+  var em=document.getElementById('empty'), et=document.getElementById('empty-t'), er=document.getElementById('empty-request');
+  function showEmpty(n){
+    em.hidden=n>0; if(n>0)return;
+    var t=q.value.trim(), quoted='\u201c'+t+'\u201d';
+    et.textContent=t?'No labs match '+quoted+'.':'No labs match these filters.';
+    er.href=VT_REQ.issues+'?'+new URLSearchParams({title:'[Lab request] '+t, body:VT_REQ.body.replace('{q}', t?' for '+quoted:'')});
+    er.textContent=t?'Request '+quoted+' as a lab':'Request a lab';
+  }
+  document.getElementById('empty-clear').addEventListener('click',function(){document.getElementById('clear').click();q.focus();});
   // restore a shared / returning view
   var u=new URLSearchParams(location.search);
   if(u.get('q'))q.value=u.get('q');
@@ -731,13 +748,42 @@ def render_404():
     out = HEAD.format(title=f'Not found | {BRAND}', desc='This page does not exist.',
                       canonical=SITE + '/404', ogtype='website', css='/assets/app.css',
                       ogimg=SITE + '/og-image.png', extra='<meta name="robots" content="noindex">\n')
+    from urllib.parse import urlencode
+    request = ISSUES + '?' + urlencode({'title': '[Lab request] ', 'body': LAB_REQUEST_BODY.format(url='')})
     out += ('<main id="main" class="wrap notfound"><p class="catno">404</p>'
             '<h1>This target is not in the registry.</h1>'
-            '<p class="lead">The link may be old or mistyped. Browse every lab from the registry, '
-            'or search it by ID, CVE or product.</p>'
-            '<p><a class="btn" href="/">Go to the registry</a></p></main>')
-    out += FOOTER.format(root='/', year=YEAR) + '</body></html>'
+            '<p class="lead" id="nf-lead">The link may be old or mistyped. Search the registry by ID, CVE or product, '
+            'or ask for the lab to be added.</p>'
+            '<p class="nf-actions"><a class="btn" href="/">Go to the registry</a>'
+            '<a class="btn btn-ghost" id="nf-search" href="/" hidden>Search the registry</a>'
+            f'<a class="btn btn-ghost" id="nf-request" href="{e(request)}" target="_blank" rel="noopener">Request a lab</a></p>'
+            '</main>')
+    out += FOOTER.format(root='/', year=YEAR) + NOTFOUND_JS + '</body></html>'
     return out
+
+SEARCH_REQUEST_BODY = ('Requested from a registry search with no results{q}.\n\n'
+                       '**What should this lab cover?** (CVE / advisory ID, product and affected version)\n\n\n'
+                       '**References**\n')
+
+LAB_REQUEST_BODY = ('Requested from a link that does not exist yet{url}.\n\n'
+                    '**What should this lab cover?** (CVE / advisory ID, product and affected version)\n\n\n'
+                    '**References**\n')
+
+# 404 is one static file served for every missing path: read the path and, when its last segment looks
+# like an ID, offer a search for it and prefill the request with it. Without JS the generic links stay.
+NOTFOUND_JS = """<script>
+(function(){
+  var seg=decodeURIComponent(location.pathname).split('/').filter(Boolean).pop()||'';
+  if(!/^[A-Za-z0-9][A-Za-z0-9._-]{2,63}$/.test(seg)||/\\.(html?|php|png|jpe?g|svg|css|js|xml|txt|json)$/i.test(seg))return;
+  var s=document.getElementById('nf-search'), r=document.getElementById('nf-request'), l=document.getElementById('nf-lead');
+  s.href='/?q='+encodeURIComponent(seg); s.textContent='Search the registry for \\u201c'+seg+'\\u201d'; s.hidden=false;
+  var u=new URL(r.href); u.searchParams.set('title','[Lab request] '+seg);
+  u.searchParams.set('body',u.searchParams.get('body').replace('yet.','yet: '+location.origin+location.pathname+'.'));
+  r.href=u.toString(); r.textContent='Request '+seg+' as a lab';
+  l.textContent='There is no lab at \\u201c'+seg+'\\u201d yet. It may have a different ID, or it may not exist.';
+})();
+</script>
+"""
 
 def redirect_page(to, canonical):
     """Static redirect for a URL the old site published (keeps shared links alive)."""
@@ -782,6 +828,7 @@ def llms_txt(order):
              'Labs are intentionally vulnerable: run them only on your own machine or systems you are authorised to test.', '',
              '## Catalog', '',
              f'- [Lab catalog (JSON)]({SITE}/labs.json): every lab with ID, CVE, CWE, severity, summary, run command and URL',
+             f'- [New labs (RSS)]({SITE}/feed.xml): the {FEED_SIZE} most recently added labs',
              f'- [Sitemap]({SITE}/sitemap.xml)', '']
     for title, keep in groups:
         labs = [t for t in order if keep(t)]
@@ -797,6 +844,41 @@ def llms_txt(order):
               '- [vt CLI](https://github.com/HappyHackingSpace/vt): the command-line tool that starts the labs',
               '- [Lab templates](https://github.com/HappyHackingSpace/vt-templates): source of every lab', '']
     return '\n'.join(lines)
+
+FEED_SIZE = 50
+
+def rss_feed(order):
+    """/feed.xml (RSS 2.0): the newest labs. lastBuildDate is the newest lab's date, not the build time,
+    so the several automatic rebuilds a day do not look like changes to feed readers."""
+    from email.utils import format_datetime
+    from datetime import datetime, timezone
+    def rfc822(t):
+        d = iso_date(t.get('added_date'))
+        return format_datetime(datetime.fromisoformat(d).replace(tzinfo=timezone.utc)) if d else ''
+    x = lambda s: html.escape(str(s), quote=False)
+    items = []
+    for t in order[:FEED_SIZE]:
+        info = t.get('info', {}); tid = t['id']; did = disp_id(tid); url = f'{SITE}/{did}/'
+        ref = ref_id(t); name = str(info.get('name') or did)
+        title = name if (not ref or ref in name) else f'{ref}: {name}'
+        body = meta_desc(info.get('description'), 400) or name
+        cats = [info.get('type', 'Lab')] + ([sev_of(t)] if sev_of(t) else [])
+        items.append('    <item>\n'
+                     f'      <title>{x(title)}</title>\n      <link>{x(url)}</link>\n'
+                     f'      <guid isPermaLink="true">{x(url)}</guid>\n'
+                     + (f'      <pubDate>{rfc822(t)}</pubDate>\n' if rfc822(t) else '')
+                     + ''.join(f'      <category>{x(c)}</category>\n' for c in cats)
+                     + f'      <description>{x(body + " Run it: vt start --id " + tid)}</description>\n'
+                     '    </item>\n')
+    newest = next((rfc822(t) for t in order if rfc822(t)), '')
+    return ('<?xml version="1.0" encoding="UTF-8"?>\n'
+            '<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">\n  <channel>\n'
+            f'    <title>{BRAND}: new labs</title>\n    <link>{SITE}/</link>\n'
+            f'    <description>{x(HOME_DESC)}</description>\n    <language>en</language>\n'
+            + (f'    <lastBuildDate>{newest}</lastBuildDate>\n' if newest else '')
+            + f'    <atom:link href="{SITE}/feed.xml" rel="self" type="application/rss+xml"/>\n'
+            f'    <image><url>{SITE}/icon-192.png</url><title>{BRAND}: new labs</title><link>{SITE}/</link></image>\n'
+            + ''.join(items) + '  </channel>\n</rss>\n')
 
 def write(path, text):
     os.makedirs(os.path.dirname(path), exist_ok=True)
@@ -853,6 +935,7 @@ def main():
                     for u in urls) + '</urlset>\n')
     write(os.path.join(DIST, 'labs.json'), json.dumps(lab_catalog(order), ensure_ascii=False, indent=1) + '\n')
     write(os.path.join(DIST, 'llms.txt'), llms_txt(order))
+    write(os.path.join(DIST, 'feed.xml'), rss_feed(order))
     write(os.path.join(DIST, 'robots.txt'), f'User-agent: *\nAllow: /\nSitemap: {SITE}/sitemap.xml\n')
     print(f'built {len(ts)} detail pages + home, {aliases} legacy aliases, 404, sitemap'
           f'{", per-lab OG images" if og else " (no Pillow: shared OG image)"} -> {os.path.relpath(DIST)}')
