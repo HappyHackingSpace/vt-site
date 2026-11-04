@@ -21,10 +21,10 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout site repo
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
 
       - name: Checkout vt-templates for data
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
         with:
           repository: HappyHackingSpace/vt-templates
           path: vt-templates-data
