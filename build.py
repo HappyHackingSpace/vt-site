@@ -282,7 +282,8 @@ MATRIX_JS = """<script>
   var ctx=c.getContext('2d'), hero=c.parentElement, drops=[], cols=0, fs=14;
   var chars='アイウエオカキクケサシスセソ0123456789ABCDEF<>{}[]=/\\\\'.split('');
   // under the magnetic cursor, glyphs flip to letters of the brand words
-  var brand='HHS HAPPYHACKINGSPACE VT VULNERABLETARGET'.replace(/ /g,'').split('');
+  // under the cursor each column spells these words top to bottom, one letter per row (the gap is a blank row)
+  var brand='HHS HAPPYHACKINGSPACE VT VULNERABLETARGET   '.split(''), spell=[];
   function col(){var s=getComputedStyle(document.documentElement);
     return {m:s.getPropertyValue('--matrix').trim()||'232,56,74',
             a:parseFloat(s.getPropertyValue('--matrix-alpha'))||0.4,
@@ -291,18 +292,13 @@ MATRIX_JS = """<script>
   var C=col();
   function size(){c.width=window.innerWidth; c.height=window.innerHeight;
     cols=Math.ceil(c.width/fs); drops=[]; for(var i=0;i<cols;i++)drops[i]=Math.random()*(-c.height/fs);}
-  // WCAG 2.2.2: motion that starts by itself must stop within 5 s. The rain runs 5 s on load, then
-  // freezes into a static texture; pointer movement over the background (a user action) wakes it briefly.
-  var timer=null, stopAt=0;
-  function tick(){ draw(); if(Date.now()>=stopAt){ clearInterval(timer); timer=null; } }
-  function run(ms){ stopAt=Math.max(stopAt, Date.now()+ms); if(!timer) timer=setInterval(tick,55); }
-  size(); window.addEventListener('resize',function(){ size(); run(5000); });   // resizing clears the canvas: refill
+  size(); window.addEventListener('resize',size);
   var mx=-9999,my=-9999,R=200;
   // magnetic cursor: only in the BACKGROUND / margins — disabled while the cursor is over a readable region
   window.addEventListener('mousemove',function(ev){
     var t=ev.target;
     if(t && t.closest && t.closest('.main, aside, footer, .filterbar, .card')){ mx=-9999; my=-9999; return; }
-    mx=ev.clientX; my=ev.clientY; run(1500);
+    mx=ev.clientX; my=ev.clientY;
   });
   window.addEventListener('mouseout',function(ev){if(!ev.relatedTarget){mx=-9999;my=-9999;}});
   function draw(){
@@ -314,10 +310,11 @@ MATRIX_JS = """<script>
       var fade=Math.max(0.15, 1-(y/c.height));
       var a=C.a*fade, col=C.m;
       if(mx>-9000){ var dx=mx-x, dy=my-y, d=Math.sqrt(dx*dx+dy*dy);
-        if(d<R){ var tt=1-d/R, pull=tt*tt*0.55;   // glyphs bend / gather toward the cursor
-          x+=dx*pull; y+=dy*pull;
+        if(d<R){ var tt=1-d/R, pull=tt*tt*0.55;   // glyphs bend toward the cursor
+          x+=dx*pull; y+=dy*pull*0.2;              // keep rows in order so the spelled words stay readable
           a=Math.min(1, a+tt*0.8); col=C.hi;       // highlight (theme-aware), not red
-          ch=brand[Math.floor(Math.random()*brand.length)]; } }   // flip to brand letters
+          if(spell[i]==null||drops[i]<spell[i]) spell[i]=drops[i];       // column entered the field: start the words
+          ch=brand[Math.floor(drops[i]-spell[i])%brand.length]; } else spell[i]=null; } else spell[i]=null;
       ctx.fillStyle='rgba('+col+','+a+')';
       ctx.fillText(ch, x, y);
       if(y>c.height && Math.random()>0.975) drops[i]=0;
@@ -326,7 +323,7 @@ MATRIX_JS = """<script>
   }
   function hexToRgb(h){h=h.replace('#','');if(h.length===3)h=h.split('').map(function(x){return x+x;}).join('');
     var n=parseInt(h,16);return ((n>>16)&255)+','+((n>>8)&255)+','+(n&255);}
-  run(5000);
+  setInterval(draw,55);   // continuous rain (prefers-reduced-motion still skips it entirely, above)
 })();
 </script>
 """
@@ -674,8 +671,11 @@ def render_home(ts):
     # empty result: say what matched nothing and give the two ways forward (clear, or ask for the lab)
     out += ('<div class="empty" id="empty" hidden><p class="empty-t" id="empty-t">No labs match these filters.</p>'
             '<p class="empty-d">Check the ID, or try a product name, CVE or tag. If the lab does not exist yet, ask for it.</p>'
-            '<p class="nf-actions"><button type="button" class="btn" id="empty-clear">Clear search and filters</button>'
-            f'<a class="btn btn-ghost" id="empty-request" href="{e(ISSUES)}" target="_blank" rel="noopener">Request a lab</a></p></div>')
+            '<div id="empty-suggest"></div>'
+            '<p class="nf-primary"><button type="button" class="btn" id="empty-clear">Clear search and filters</button></p>'
+            f'<ul class="nf-more"><li><a id="empty-request" href="{e(ISSUES)}" target="_blank" rel="noopener">Request a lab</a> '
+            '<span class="nf-note">opens GitHub</span></li></ul></div>')
+    out += SUGGEST_JS
     out += '<script>var VT_REQ=' + json.dumps({'issues': ISSUES, 'body': SEARCH_REQUEST_BODY}).replace('</', '<\\/') + ';</script>'
     out += '</div></main>'
     out += FOOTER.format(root='./', year=YEAR)
@@ -720,6 +720,8 @@ def render_home(ts):
     et.textContent=t?'No labs match '+quoted+'.':'No labs match these filters.';
     er.href=VT_REQ.issues+'?'+new URLSearchParams({title:'[Lab request] '+t, body:VT_REQ.body.replace('{q}', t?' for '+quoted:'')});
     er.textContent=t?'Request '+quoted+' as a lab':'Request a lab';
+    var box=document.getElementById('empty-suggest'); box.textContent='';
+    if(t) vtSuggest(t,function(x){ if(x&&!em.hidden&&q.value.trim()===t) box.appendChild(vtSuggestCard(x)); });
   }
   document.getElementById('empty-clear').addEventListener('click',function(){document.getElementById('clear').click();q.focus();});
   // restore a shared / returning view
@@ -754,11 +756,13 @@ def render_404():
             '<h1>This target is not in the registry.</h1>'
             '<p class="lead" id="nf-lead">The link may be old or mistyped. Search the registry by ID, CVE or product, '
             'or ask for the lab to be added.</p>'
-            '<p class="nf-actions"><a class="btn" href="/">Go to the registry</a>'
-            '<a class="btn btn-ghost" id="nf-search" href="/" hidden>Search the registry</a>'
-            f'<a class="btn btn-ghost" id="nf-request" href="{e(request)}" target="_blank" rel="noopener">Request a lab</a></p>'
+            '<div id="nf-suggest"></div>'
+            '<p class="nf-primary"><a class="btn" href="/">Go to the registry</a></p>'
+            '<ul class="nf-more"><li id="nf-search-li" hidden><a id="nf-search" href="/">Search the registry</a></li>'
+            f'<li><a id="nf-request" href="{e(request)}" target="_blank" rel="noopener">Request a lab</a> '
+            '<span class="nf-note">opens GitHub</span></li></ul>'
             '</main>')
-    out += FOOTER.format(root='/', year=YEAR) + NOTFOUND_JS + '</body></html>'
+    out += FOOTER.format(root='/', year=YEAR) + SUGGEST_JS + NOTFOUND_JS + '</body></html>'
     return out
 
 SEARCH_REQUEST_BODY = ('Requested from a registry search with no results{q}.\n\n'
@@ -771,16 +775,43 @@ LAB_REQUEST_BODY = ('Requested from a link that does not exist yet{url}.\n\n'
 
 # 404 is one static file served for every missing path: read the path and, when its last segment looks
 # like an ID, offer a search for it and prefill the request with it. Without JS the generic links stay.
+SUGGEST_JS = """<script>
+// "Did you mean ...?": the lab whose ID / CVE / GHSA is closest to a mistyped term (edit distance over /labs.json)
+function vtSuggest(term,done){
+  var t=String(term||'').toLowerCase(); if(t.length<4){done(null);return;}
+  function lev(a,b){var n=b.length,p=[],i,j,prev,tmp;for(j=0;j<=n;j++)p[j]=j;
+    for(i=1;i<=a.length;i++){prev=p[0];p[0]=i;for(j=1;j<=n;j++){tmp=p[j];p[j]=Math.min(p[j]+1,p[j-1]+1,prev+(a[i-1]===b[j-1]?0:1));prev=tmp;}}
+    return p[n];}
+  fetch('/labs.json').then(function(r){return r.json();}).then(function(L){
+    var best=null,bd=1e9;
+    L.forEach(function(x){[x.vt_id,x.id,x.cve,x.ghsa].forEach(function(k){if(!k)return;var d=lev(t,String(k).toLowerCase());if(d<bd){bd=d;best=x;}});});
+    done(bd>0&&bd<=Math.min(3,Math.floor(t.length/4))?best:null);   // close enough to be a typo, not a different ID
+  }).catch(function(){done(null);});
+}
+function vtSuggestCard(x){
+  var a=document.createElement('a'); a.className='nf-suggest'; a.href='/'+x.vt_id+'/';
+  [['nf-k','Did you mean'],['catno',x.vt_id],['nf-n',x.name]].forEach(function(p){
+    var s=document.createElement('span'); s.className=p[0]; s.textContent=p[1]; a.appendChild(s);});
+  return a;
+}
+</script>
+"""
+
 NOTFOUND_JS = """<script>
 (function(){
   var seg=decodeURIComponent(location.pathname).split('/').filter(Boolean).pop()||'';
   if(!/^[A-Za-z0-9][A-Za-z0-9._-]{2,63}$/.test(seg)||/\\.(html?|php|png|jpe?g|svg|css|js|xml|txt|json)$/i.test(seg))return;
-  var s=document.getElementById('nf-search'), r=document.getElementById('nf-request'), l=document.getElementById('nf-lead');
-  s.href='/?q='+encodeURIComponent(seg); s.textContent='Search the registry for \\u201c'+seg+'\\u201d'; s.hidden=false;
+  var s=document.getElementById('nf-search'), r=document.getElementById('nf-request'), l=document.getElementById('nf-lead'),
+      quoted='\\u201c'+seg+'\\u201d';
+  s.href='/?q='+encodeURIComponent(seg); s.textContent='Search the registry for '+quoted;
+  document.getElementById('nf-search-li').hidden=false;
   var u=new URL(r.href); u.searchParams.set('title','[Lab request] '+seg);
   u.searchParams.set('body',u.searchParams.get('body').replace('yet.','yet: '+location.origin+location.pathname+'.'));
-  r.href=u.toString(); r.textContent='Request '+seg+' as a lab';
-  l.textContent='There is no lab at \\u201c'+seg+'\\u201d yet. It may have a different ID, or it may not exist.';
+  r.href=u.toString(); r.textContent='Request '+quoted+' as a lab';
+  l.textContent='There is no lab at '+quoted+' yet. It may have a different ID, or it may not exist.';
+  vtSuggest(seg,function(x){ if(!x)return;
+    l.textContent='There is no lab at '+quoted+', but one has a very similar ID.';
+    document.getElementById('nf-suggest').appendChild(vtSuggestCard(x)); });
 })();
 </script>
 """

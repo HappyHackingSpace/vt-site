@@ -244,10 +244,19 @@ footer code { font-family: var(--mono); color: var(--dim); }
 .notfound .lead { color: var(--dim); max-width: 60ch; margin: 0 0 1.6rem; }
 .btn { display: inline-block; background: var(--accent-solid); color: #fff; font-weight: 600; padding: .65rem 1.1rem; border-radius: var(--radius); }
 .btn:hover { text-decoration: none; filter: brightness(1.1); }
-.btn-ghost { background: transparent; color: var(--bright); border: 1px solid var(--line); }
-.btn-ghost:hover { border-color: var(--accent); filter: none; }
-.nf-actions { display: flex; flex-wrap: wrap; gap: .6rem; margin: 0; }
-.nf-actions [hidden] { display: none; }   /* .btn's display would otherwise override the hidden attribute */
+.nf-primary { margin: 0; }
+/* secondary actions read as links, not as rival buttons */
+.nf-more { list-style: none; padding: 0; margin: 1.6rem 0 0; max-width: 60ch; border-top: 1px solid var(--line-soft); }
+.nf-more li { padding: .65rem 0; border-bottom: 1px solid var(--line-soft); }
+.nf-more a { color: var(--accent); overflow-wrap: anywhere; }
+.nf-note { color: var(--dim); font-size: .85rem; }
+/* "Did you mean": a card in the registry's own style */
+.nf-suggest { display: grid; grid-template-columns: auto minmax(0, 1fr); gap: .2rem .8rem; align-items: baseline; max-width: 60ch; margin: 0 0 1.4rem; padding: .8rem 1rem; border: 1px solid var(--line); border-left: 3px solid var(--accent); border-radius: var(--radius); background: var(--surface); color: var(--text); }
+.nf-suggest .nf-k { grid-column: 1 / -1; font-size: .75rem; letter-spacing: .05em; text-transform: uppercase; color: var(--dim); }
+.nf-suggest .catno { font-family: var(--mono); font-size: .9rem; font-weight: 600; color: var(--accent); }
+.nf-suggest .nf-n { overflow-wrap: anywhere; }
+@media (max-width: 520px) { .nf-suggest { grid-template-columns: minmax(0, 1fr); } }
+@media (hover: hover) { .nf-suggest:hover { border-color: var(--accent); color: var(--bright); text-decoration: none; } }
 
 /* empty search / filter result (home) */
 .empty { padding: 1rem 0 5rem; max-width: 62ch; }
