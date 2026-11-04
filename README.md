@@ -1,39 +1,70 @@
-# Vulnerable Targets Sites (vt-site) 🎯
+# Vulnerable Target (vt-site)
 
 [![Website](https://img.shields.io/badge/Website-vulnerabletarget.com-red)](https://vulnerabletarget.com)
 [![License](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 
-> Next-generation vulnerability testing platform - A curated catalog of vulnerable applications, CVE PoCs, and security research templates.
+The catalogue behind [vulnerabletarget.com](https://vulnerabletarget.com): reproducible, intentionally
+vulnerable labs (CVE reproductions, security benchmarks and app labs) that run locally with one command:
 
-## 📋 About
+```sh
+vt start --id <id>
+```
 
-Vulnerable Targets Sites (vt-site) is an open-source catalog designed for security researchers, penetration testers, and CTF enthusiasts. It provides:
+Every lab is defined in [vt-templates](https://github.com/HappyHackingSpace/vt-templates) and started with
+the [vt CLI](https://github.com/HappyHackingSpace/vt). This repository only turns that data into the website.
 
-- 🛡️ **Vulnerable Applications** - Pre-configured vulnerable apps for practice
-- 🐛 **CVE PoCs** - Proof-of-Concept exploits for known vulnerabilities
-- 🧪 **Security Benchmarks** - Testing environments for security tools
-- 🐳 **Docker Templates** - Ready-to-deploy containerized labs
+## How it works
 
-## 🏗️ Project Structure
+`build.py` is a dependency-free static site generator. It reads `templates.json` and writes the whole site
+to `dist/`:
+
+| Output | What it is |
+|---|---|
+| `index.html` | Registry: search, filters, sort. The view is kept in the URL, so it can be shared. |
+| `VT-YYYY-NNNNN/index.html` | One pre-rendered page per lab, with structured data (JSON-LD). |
+| `vt-…/`, `detail.html` | Redirects for the URLs the previous site published, so shared links keep working. |
+| `404.html`, `sitemap.xml`, `robots.txt` | The usual. |
+| `llms.txt`, `labs.json` | Machine-readable catalogue for AI answer engines. |
+| `og/<id>.png` | Per-lab share image, drawn by `og.py` when Pillow is installed (CI installs it). |
+
+## Project structure
 
 ```
 vt-site/
-├── index.html          # Main page with search & catalog
-├── detail.html         # Vulnerability details page
-├── 404.html           # Custom 404 error page
+├── build.py              # site generator
+├── og.py                 # per-lab share images (optional, needs Pillow)
 ├── assets/
-│   ├── css/style.css  # Styling
-│   └── templates.json # Vulnerability database
-└── .github/           # GitHub Actions workflows
+│   ├── app.css           # design system (dark theme, tokens)
+│   ├── brand/            # onion mark, icon set, share image
+│   └── templates.json    # fallback data; CI replaces it with the latest from vt-templates
+├── docs/SCHEMA.md        # template field reference
+└── .github/workflows/
+    └── deploy.yml        # build + publish to GitHub Pages
 ```
- 
-## 🤝 Contributing
 
-Contributions are welcome! Please feel free to submit a Pull Request.
+## Run it locally
 
-## 📄 License
+```sh
+python3 build.py
+python3 -m http.server 8791 -d dist
+```
 
-This project is licensed under the MIT License.
+Then open <http://127.0.0.1:8791/>. With a `vt-templates` checkout next to this repository, `build.py` uses
+its fresher `templates.json` automatically.
+
+## Deploy
+
+Pushing to `main`, or a `templates-updated` event from vt-templates, runs `deploy.yml`: it fetches the latest
+`templates.json`, runs `build.py` and publishes `dist/` to GitHub Pages.
+
+## Contributing
+
+To add or fix a lab, open a pull request on [vt-templates](https://github.com/HappyHackingSpace/vt-templates).
+For the website itself, pull requests here are welcome.
+
+## License
+
+MIT.
 
 ---
 

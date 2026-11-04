@@ -36,10 +36,14 @@ jobs:
           cp vt-templates-data/.assets/templates.json assets/templates.json
           rm -rf vt-templates-data
 
-      - name: Generate OG pages and images
+      # Static site generator (build.py): home, one pre-rendered page per lab at /VT-…/,
+      # redirects for the old /vt-…/ and /detail.html?id= URLs, 404, sitemap, llms.txt, labs.json,
+      # icons and per-lab OG images.
+      - name: Build site
         run: |
+          sudo apt-get install -y --no-install-recommends fonts-dejavu-core   # fonts for the OG images
           pip install Pillow
-          python3 scripts/generate_pages.py
+          python3 build.py
 
       - name: Setup Pages
         uses: actions/configure-pages@v4
@@ -47,7 +51,7 @@ jobs:
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:
-          path: '.'
+          path: 'dist'
 
       - name: Deploy to GitHub Pages
         id: deployment

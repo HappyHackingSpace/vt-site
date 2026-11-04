@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48">
+  <title>Vulnerable Target — one colour (white)</title>
+  <!-- rings are knocked out (transparent) so the mark stays an onion in one ink -->
+  <mask id="m"><circle cx="24" cy="24" r="18" fill="#fff"/>
+    <circle cx="24" cy="24" r="13.5" fill="none" stroke="#000" stroke-width="2.3"/>
+    <circle cx="24.6" cy="24.6" r="9" fill="none" stroke="#000" stroke-width="2.1"/>
+    <circle cx="25.2" cy="25.2" r="5" fill="none" stroke="#000" stroke-width="1.9"/></mask>
+  <circle cx="24" cy="24" r="18" fill="#FFFFFF" mask="url(#m)"/>
+</svg>
