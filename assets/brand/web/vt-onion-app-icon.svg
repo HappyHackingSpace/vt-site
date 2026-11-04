@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48">
+  <!-- Vulnerable Target — app icon: full-colour onion on ink tile -->
+  <rect width="48" height="48" fill="#0F1217"/>
+  <g transform="translate(24 24) scale(0.95) translate(-24 -24)">
+    <circle cx="24" cy="24" r="18" fill="#EFE4C9"/>
+    <circle cx="24" cy="24" r="13.5" fill="none" stroke="#0F1217" stroke-width="2.3"/>
+    <circle cx="24.6" cy="24.6" r="9" fill="none" stroke="#0F1217" stroke-width="2.1"/>
+    <circle cx="25.2" cy="25.2" r="5" fill="none" stroke="#0F1217" stroke-width="1.9"/>
+    <circle cx="25.6" cy="25.6" r="3" fill="#E8384A"/>
+  </g>
+</svg>

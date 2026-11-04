@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex">
+<title>Vulnerable Target — brand mark</title>
+<link rel="icon" href="web/favicon.svg" type="image/svg+xml">
+<style>
+  :root { --bg:#0F1217; --surface:#161A21; --line:#262D38; --text:#C9D1DC; --dim:#979FAB; --bright:#F4F7FB; --accent:#EB5160; }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--bg); color: var(--text); font: 1rem/1.6 system-ui, sans-serif; -webkit-font-smoothing: antialiased; }
+  main { max-width: 1180px; margin: 0 auto; padding: 3rem clamp(1rem, 4vw, 2.5rem) 5rem; }
+  h1 { color: var(--bright); font-size: 2rem; line-height: 1.15; margin: 0 0 .4rem; letter-spacing: -.02em; }
+  h2 { color: var(--bright); font-size: 1.15rem; margin: 3rem 0 1rem; padding-bottom: .5rem; border-bottom: 1px solid var(--line); }
+  p { color: var(--dim); max-width: 68ch; margin: 0; }
+  .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 1rem; }
+  figure { margin: 0; background: var(--surface); border: 1px solid var(--line); border-radius: 10px; overflow: hidden; }
+  figure.wide { grid-column: 1 / -1; }
+  .tile { aspect-ratio: 1; display: grid; place-items: center; padding: 1.2rem; }
+  .wide .tile { aspect-ratio: auto; }
+  .tile.light { background: #F7F7F5; }
+  .tile img { max-width: 100%; max-height: 100%; }
+  figcaption { padding: .6rem .8rem; font-size: .85rem; color: var(--dim); border-top: 1px solid var(--line); }
+  figcaption b { color: var(--bright); font-weight: 600; display: block; }
+  .tag { display: inline-block; font-size: .72rem; padding: .05rem .45rem; border-radius: 4px; background: var(--accent); color: #0F1217; font-weight: 700; margin-left: .3rem; vertical-align: middle; }
+</style>
+</head>
+<body>
+<main>
+  <h1>Brand mark</h1>
+  <p>The Vulnerable Target mark and every file made from it. Geometry and colours are in <code>onion-cross.md</code>; <code>build.py</code> copies this folder to <code>/assets/brand/</code>.</p>
+
+  <h2>Onion cross-section</h2>
+  <div class="grid">
+    <figure><div class="tile"><img src="onion-cross-dark.svg" alt="Onion cross-section, cream on ink"></div><figcaption><b>Dark</b>onion-cross-dark.svg</figcaption></figure>
+    <figure><div class="tile light"><img src="onion-cross-light.svg" alt="Onion cross-section, ink on light"></div><figcaption><b>Light</b>onion-cross-light.svg</figcaption></figure>
+    <figure><div class="tile"><img src="web/vt-onion-app-icon.svg" alt="App icon"></div><figcaption><b>App icon</b>web/vt-onion-app-icon.svg</figcaption></figure>
+    <figure><div class="tile light"><img src="web/vt-onion-black.svg" alt="One-colour black"></div><figcaption><b>One colour, black</b>web/vt-onion-black.svg</figcaption></figure>
+    <figure><div class="tile"><img src="web/vt-onion-white.svg" alt="One-colour white"></div><figcaption><b>One colour, white</b>web/vt-onion-white.svg</figcaption></figure>
+    <figure class="wide"><div class="tile"><img src="web/og-image.png" alt="Social share image"></div><figcaption><b>Social share image, 1200×630</b>web/og-image.png (source: og-source.html)</figcaption></figure>
+  </div>
+
+</main>
+</body>
+</html>
