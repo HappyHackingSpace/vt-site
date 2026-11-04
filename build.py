@@ -114,15 +114,20 @@ def ref_id(t):
     info = t.get('info', {})
     return info.get('cve') or info.get('ghsa') or info.get('ghsl') or ''
 
-def page_title(t):
-    """CVE/advisory first (what people search for), brand last (what SERPs truncate)."""
-    info = t.get('info', {}); name = str(info.get('name') or t['id']).strip(); ref = ref_id(t)
+def lab_heading(t):
+    """'VT-2026-88804 (CVE-2026-88804): name'. Our ID leads; the CVE/advisory people search for follows it,
+    still inside the part of a title that search results show."""
+    info = t.get('info', {}); did = disp_id(t['id']); name = str(info.get('name') or did).strip(); ref = ref_id(t)
     if ref:
-        name = re.sub(r'\s*\(' + re.escape(ref) + r'\)\s*$', '', name)   # no "CVE-x: … (CVE-x)"
-        head = name if ref in name else f'{ref}: {name}'
-        return f'{head} – PoC lab | {BRAND}'
-    kind = {'Benchmark': 'benchmark lab', 'Lab': 'vulnerable app lab'}.get(info.get('type'), 'lab')
-    return f'{name} – {kind} | {BRAND}'
+        name = re.sub(r'\s*\(' + re.escape(ref) + r'\)\s*$', '', name)   # no "(CVE-x): … (CVE-x)"
+        if ref not in name:
+            return f'{did} ({ref}): {name}'
+    return f'{did}: {name}'
+
+def page_title(t):
+    """Lab heading, then what kind of page it is, brand last (what SERPs truncate first)."""
+    kind = 'PoC lab' if ref_id(t) else {'Benchmark': 'benchmark lab', 'Lab': 'vulnerable app lab'}.get(t.get('info', {}).get('type'), 'lab')
+    return f'{lab_heading(t)} – {kind} | {BRAND}'
 
 def iso_date(v):
     try:
@@ -148,6 +153,7 @@ def lab_jsonld(t, url, ogimg, desc):
            'description': desc, 'url': url, 'mainEntityOfPage': url, 'image': ogimg, 'inLanguage': 'en',
            'author': {'@id': ORG_ID} if author in ('', 'hhsteam') else {'@type': 'Person', 'name': author},
            'publisher': {'@id': ORG_ID}, 'isPartOf': {'@id': SITE_ID}}
+    art['identifier'] = [did] + ([ref_id(t)] if ref_id(t) else [])   # both IDs name the same lab
     if iso_date(t.get('added_date')):
         art['datePublished'] = iso_date(t.get('added_date'))
     if info.get('tags'):
@@ -867,8 +873,8 @@ def llms_txt(order):
             continue
         lines += [f'## {title}', '']
         for t in labs:
-            info = t['info']; did = disp_id(t['id']); ref = ref_id(t)
-            label = info.get('name', did) if (not ref or ref in info.get('name', '')) else f"{ref}: {info.get('name', did)}"
+            info = t['info']; did = disp_id(t['id'])
+            label = lab_heading(t)
             lines.append(f'- [{label}]({SITE}/{did}/): {meta_desc(info.get("description"), 140)}')
         lines.append('')
     lines += ['## Optional', '',
@@ -890,8 +896,8 @@ def rss_feed(order):
     items = []
     for t in order[:FEED_SIZE]:
         info = t.get('info', {}); tid = t['id']; did = disp_id(tid); url = f'{SITE}/{did}/'
-        ref = ref_id(t); name = str(info.get('name') or did)
-        title = name if (not ref or ref in name) else f'{ref}: {name}'
+        name = str(info.get('name') or did)
+        title = lab_heading(t)
         body = meta_desc(info.get('description'), 400) or name
         cats = [info.get('type', 'Lab')] + ([sev_of(t)] if sev_of(t) else [])
         items.append('    <item>\n'
