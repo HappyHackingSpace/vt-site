@@ -302,7 +302,6 @@ code.ic { font-family: var(--mono); font-size: .86em; background: var(--surface-
 .metaline .m-param b { color: var(--text); font-weight: 600; }
 .metaline .m-auth { color: var(--med); }
 .metaline .m-unauth { color: var(--crit); font-weight: 600; }
-.metaline .sep { color: var(--faint); }
 .note { color: var(--dim); font-size: .92rem; max-width: 74ch; }
 
 /* exploitation steps */

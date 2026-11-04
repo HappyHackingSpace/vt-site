@@ -126,8 +126,8 @@ def lab_heading(t):
 
 def page_title(t):
     """Lab heading, then what kind of page it is, brand last (what SERPs truncate first)."""
-    kind = 'PoC lab' if ref_id(t) else {'Benchmark': 'benchmark lab', 'Lab': 'vulnerable app lab'}.get(t.get('info', {}).get('type'), 'lab')
-    return f'{lab_heading(t)} – {kind} | {BRAND}'
+    kind = 'PoC lab' if ref_id(t) else {'Benchmark': 'Benchmark lab', 'Lab': 'App lab'}.get(t.get('info', {}).get('type'), 'Lab')
+    return f'{lab_heading(t)} | {kind} on {BRAND}'
 
 def iso_date(v):
     try:
@@ -300,7 +300,7 @@ MATRIX_JS = """<script>
     cols=Math.ceil(c.width/fs); drops=[]; for(var i=0;i<cols;i++)drops[i]=Math.random()*(-c.height/fs);}
   size(); window.addEventListener('resize',size);
   var mx=-9999,my=-9999,R=200;
-  // magnetic cursor: only in the BACKGROUND / margins — disabled while the cursor is over a readable region
+  // magnetic cursor: only in the background / margins; disabled while the cursor is over a readable region
   window.addEventListener('mousemove',function(ev){
     var t=ev.target;
     if(t && t.closest && t.closest('.main, aside, footer, .filterbar, .card')){ mx=-9999; my=-9999; return; }
@@ -353,7 +353,7 @@ FOOTER = """<footer><div class="wrap">
       <a href="https://github.com/HappyHackingSpace" target="_blank" rel="noopener">HappyHackingSpace on GitHub</a>
     </div>
   </div>
-  <p class="legal"><span class="legal-badge">Authorised use only</span> These environments are intentionally vulnerable. Run them only on your own machine or on systems you have explicit written permission to test. You are solely responsible for how you use them — never point VT tooling or payloads at systems you do not own or are not authorised to assess.</p>
+  <p class="legal"><span class="legal-badge">Authorised use only</span> These environments are intentionally vulnerable. Run them only on your own machine or on systems you have explicit written permission to test. You are solely responsible for how you use them. Never point VT tooling or payloads at systems you do not own or are not authorised to assess.</p>
   <div class="fbottom">
     <a class="madeby" href="https://github.com/HappyHackingSpace" target="_blank" rel="noopener">
       Made with <span class="heart">&#9829;</span> by
@@ -397,7 +397,7 @@ def render_detail(t, related=(), newer=None, older=None):
 
     chips = []
     if sev:
-        chips.append(f'<span class="sev sev-{e(sev)}">{e(sev.upper())}{(" · "+e(score)) if score!="" else ""}</span>')
+        chips.append(f'<span class="sev sev-{e(sev)}">{e(sev.upper())}{(" "+e(score)) if score!="" else ""}</span>')
     chips.append(f'<span class="type">{e(info.get("type","LAB"))}</span>')
     diff = info.get('difficulty')
     if diff:
@@ -440,7 +440,7 @@ def render_detail(t, related=(), newer=None, older=None):
         if isinstance(pc, dict):
             if pc.get('image'): extra.append(e(pc['image']))
             if pc.get('ports'): extra.append('ports ' + e(', '.join(str(x) for x in pc['ports'])))
-        if extra: val += metrics(' · '.join(extra))
+        val += ''.join(metrics(x) for x in extra)   # one fact per line
         srow('Lab', val)
 
     # ---- sections ----
@@ -472,7 +472,7 @@ def render_detail(t, related=(), newer=None, older=None):
             if authtxt:
                 mparts.append(f'<span class="{"m-unauth" if authtxt == "unauthenticated" else "m-auth"}">{e(authtxt)}</span>')
             if mparts:
-                body += '<p class="metaline">' + '<span class="sep">·</span>'.join(mparts) + '</p>'
+                body += '<p class="metaline">' + ''.join(mparts) + '</p>'   # spacing separates the parts
             if vb.get('precondition'): body += f'<p class="note">Precondition: {e(vb["precondition"])}</p>'
             if vb.get('headers'):
                 hh = vb['headers']
@@ -504,7 +504,7 @@ def render_detail(t, related=(), newer=None, older=None):
                 for p in vb['payloads']:
                     if isinstance(p, dict):
                         body += (f'<div class="pl"><div class="pl-h">{e(p.get("name",""))}'
-                                 + (f' — <span class="pl-note">{e(p.get("note",""))}</span>' if p.get('note') else '')
+                                 + (f': <span class="pl-note">{e(p.get("note",""))}</span>' if p.get('note') else '')
                                  + f'</div><pre class="code">{_hl_body(str(p.get("value","")))}</pre></div>')
                     else:
                         body += f'<div class="pl"><pre class="code">{_hl_body(str(p))}</pre></div>'
@@ -633,7 +633,7 @@ def render_home(ts):
     bench_n = counts.get('type', {}).get('Benchmark', 0)
     lab_n = counts.get('type', {}).get('Lab', 0)
 
-    out = HEAD.format(title=f'{BRAND} – reproducible vulnerable labs, one command each',
+    out = HEAD.format(title=f'{BRAND}: vulnerable labs you start with one command',
                       desc=e(HOME_DESC), canonical=SITE + '/', ogtype='website', css='assets/app.css',
                       ogimg=SITE + '/og-image.png',
                       extra='<link rel="alternate" type="application/json" href="/labs.json" title="Lab catalog">\n'
@@ -642,7 +642,7 @@ def render_home(ts):
     out += ('<section class="hero"><canvas id="hero-matrix" aria-hidden="true"></canvas><div class="wrap">'
             '<div class="hero-copy">'
             '<h1>Spin up a vulnerable target from your terminal.</h1>'
-            '<p class="lead">Hack and learn on your local machine — reproducible labs, one command each.</p>'
+            '<p class="lead">Hack and learn on your own machine. Every lab starts with one command.</p>'
             + render_run('vt-2026-96654') +
             f'<div class="statline">'
             f'<span class="stat"><b>{total}</b><span>labs</span></span>'
