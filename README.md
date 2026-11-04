@@ -25,6 +25,7 @@ to `dist/`:
 | `vt-…/`, `detail.html` | Redirects for the URLs the previous site published, so shared links keep working. |
 | `404.html`, `sitemap.xml`, `robots.txt` | The usual. |
 | `llms.txt`, `labs.json` | Machine-readable catalogue for AI answer engines. |
+| `feed.xml` | RSS feed of the newest labs (linked from every page for feed readers). |
 | `og/<id>.png` | Per-lab share image, drawn by `og.py` when Pillow is installed (CI installs it). |
 
 ## Project structure
